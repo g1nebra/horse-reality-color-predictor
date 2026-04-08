@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Genetics, Breed Reference by claymore</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #202026;
+    --border: #2a2a32;
+    --border2: #35353f;
+    --text: #e8e8f0;
+    --muted: #7a7a8c;
+    --dim: #4a4a5a;
+    --accent: #7c6af7;
+    --accent-dim: #2d2640;
+
+    --tag-vis-bg: #1a2a3f;
+    --tag-vis-text: #7ab8f5;
+    --tag-vis-border: #2a4060;
+
+    --tag-hid-bg: #25203a;
+    --tag-hid-text: #b09af5;
+    --tag-hid-border: #3a3060;
+
+    --tag-wht-bg: #1a2f28;
+    --tag-wht-text: #6dd4a8;
+    --tag-wht-border: #2a4f40;
+
+    --tag-sus-bg: #2f2510;
+    --tag-sus-text: #e0a84a;
+    --tag-sus-border: #4f3d18;
+
+    --tag-none-bg: #1e1e24;
+    --tag-none-text: #5a5a6e;
+    --tag-none-border: #2e2e38;
+
+    --complete-bg: #1a2f20;
+    --complete-text: #5dba7a;
+    --incomplete-bg: #2f1a1a;
+    --incomplete-text: #ba5d5d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  header {
+    padding: 32px 32px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .logo-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-title span { color: var(--accent); }
+
+  .logo-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+  }
+
+  .header-meta {
+    font-size: 11px;
+    color: var(--dim);
+    font-family: 'DM Mono', monospace;
+    text-align: right;
+    line-height: 1.7;
+  }
+
+  .controls {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .controls-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  input[type="search"] {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="search"]:focus { border-color: var(--accent); }
+  input[type="search"]::placeholder { color: var(--dim); }
+
+  select {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  select:focus { border-color: var(--accent); }
+
+  .count-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  .pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .pills-label {
+    font-size: 11px;
+    color: var(--dim);
+    font-family: 'DM Mono', monospace;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    transition: all 0.12s;
+    user-select: none;
+  }
+
+  .pill:hover { border-color: var(--accent); color: var(--text); }
+  .pill.on { background: var(--accent-dim); border-color: var(--accent); color: #b8aefc; }
+
+  .legend {
+    padding: 10px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  thead tr {
+    border-bottom: 1px solid var(--border2);
+  }
+
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  th:first-child { width: 160px; }
+  th:nth-child(2) { width: 100px; }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:hover td { background: var(--surface2); }
+
+  .breed-name {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .status {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  .status.complete { background: var(--complete-bg); color: var(--complete-text); }
+  .status.incomplete { background: var(--incomplete-bg); color: var(--incomplete-text); }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
+  .tv { background: var(--tag-vis-bg); color: var(--tag-vis-text); border-color: var(--tag-vis-border); }
+  .th2 { background: var(--tag-hid-bg); color: var(--tag-hid-text); border-color: var(--tag-hid-border); }
+  .tw { background: var(--tag-wht-bg); color: var(--tag-wht-text); border-color: var(--tag-wht-border); }
+  .ts2 { background: var(--tag-sus-bg); color: var(--tag-sus-text); border-color: var(--tag-sus-border); }
+  .tn { background: var(--tag-none-bg); color: var(--tag-none-text); border-color: var(--tag-none-border); }
+
+  .empty { color: var(--dim); font-family: 'DM Mono', monospace; font-size: 10px; font-style: italic; }
+
+  .note-text { font-size: 11px; color: var(--muted); font-style: italic; min-width: 140px; display: block; line-height: 1.5; }
+
+  .no-results {
+    padding: 48px;
+    text-align: center;
+    color: var(--dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+
+  .general-notes {
+    border-bottom: 1px solid var(--border); 
+  }
+
+  .general-notes-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    padding-top: 10px;
+  }
+
+  .general-notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .general-note-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .general-notes-list .general-note-item:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .gnote-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .gnote-badge.hr-custom {
+    background: #2a1f3a;
+    color: #c090f0;
+    border: 1px solid #4a3060;
+  }
+
+  .gnote-badge.lethal {
+    background: #2f1515;
+    color: #f07070;
+    border: 1px solid #5a2020;
+  }
+
+  .gnote-badge.mechanic {
+    background: #1a2535;
+    color: #70a8d8;
+    border: 1px solid #2a4060;
+  }
+
+  .gnote-text {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .gnote-text strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  @media (max-width: 700px) {
+    header, .controls, .legend, .general-notes { padding-left: 16px; padding-right: 16px; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-title"><span>//</span> HR Genetics</div>
+    <div class="logo-sub">horse reality · breed genetics reference · v1.0</div>
+  </div>
+  <div class="header-meta">
+    33 breeds documented<br>
+    source: deloryan.notion.site<br>
+    horsereality.wiki<br>
+    Sooty Guide for Horse Reality
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-row">
+    <input type="search" id="sq" placeholder="Search breed name...">
+    <select id="sf">
+      <option value="">All statuses</option>
+      <option value="complete">Complete</option>
+      <option value="incomplete">In-complete</option>
+    </select>
+    <span class="count-label" id="cnt">33 breeds</span>
+  </div>
+  <div class="pills-row">
+    <span class="pills-label">filter by locus:</span>
+    <div id="pills"></div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot" style="background:#2a6090"></span>Visible (testable)</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#5040a0"></span>Hidden (in-game)</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#2a6050"></span>Whites in-game</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#7a5020"></span>Suspected / not yet</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#303038"></span>No evidence</div>
+</div>
+
+<div class="general-notes">
+  <div class="general-notes-title">General notes</div>
+  <div class="general-notes-list">
+
+    <div class="general-note-item">
+      <span class="gnote-badge hr-custom">HR custom gene</span>
+      <span class="gnote-text">Several genes in Horse Reality are <strong>custom implementations with no confirmed real-world equivalent</strong>. Their allele notation, dominance rules, and interactions are defined entirely by the HR team and can only be referenced from the HR wiki or community sources, not from real equine genetics literature. Known HR-custom or non-standard genes include: <strong>Hidden Sabino (Y):</strong> recessive, untestable, covers sabino-like patterns of unknown genetic origin. <strong>Rabicano (rb):</strong> modelled as a simple recessive hidden gene, whereas real-world rabicano genetics are not fully understood. <strong>White Markings (WM):</strong> a hidden gene controlling face and leg marking size. <strong>PATN2:</strong> a hidden leopard complex modifier with no real-world testable equivalent, added to account for unexplained blanket patterns. <strong>Snowdrop (sno):</strong> a breed-specific modifier (Irish Cob, Lipizzaner) with no known real-world basis.</span>
+    </div>
+
+    <div class="general-note-item">
+      <span class="gnote-badge lethal">⚠ lethal combo</span>
+      <span class="gnote-text"><strong>Frame Overo (OLW) is lethal when homozygous.</strong> Breeding two OLW carriers gives a 25% chance of producing an OLW/OLW foal with Overo Lethal White Syndrome (OLWS). Affected foals are born with an underdeveloped intestinal tract and cannot survie, in-game they are flagged and removed at birth. Breeds confirmed to carry OLW: <strong>Mustang, Quarter Horse, Thoroughbred</strong>. Additionally, all <strong>homozygous white spotting (Wx/Wx)</strong> combinations are embryonic lethal and result in a failed covering, except <strong>W20/W20</strong>, which is the only viable homozygous white spotting in-game.</span>
+    </div>
+
+    <div class="general-note-item">
+      <span class="gnote-badge mechanic">in-game mechanic</span>
+      <span class="gnote-text"><strong>Grey (G) works differently in-game than in real life.</strong> In reality greying is a gradual progressive process. In HR, once a foal becomes an adult its coat changes to a <strong>randomly chosen grey phenotype</strong> from that breed's pool (dapple grey, steel grey, fleabitten, white, etc.). Grey foals are born hyperpigmented with darker coats than normal and may show grey goggles around the eyes. Grey overrides all other colour expression visually at adulthood. Similarly, <strong>Roan (RN)</strong> does not show on foals in-game, the roan coat only appears when the horse <strong>turns 3 years old</strong>.</span>
+    </div>
+
+    <div class="general-note-item">
+      <span class="gnote-badge mechanic">shared locus</span>
+      <span class="gnote-text"><strong>Cream (CR) and Pearl (prl) share the same locus.</strong> A horse can be CR/prl (one of each), but cannot be CR/CR and prl/prl simultaneously. A single pearl allele (prl/n) has no visible effect on its own, pearl only dilutes when homozygous (prl/prl) or paired with cream (CR/prl), producing a pseudo-double-dilute phenotype similar to a double cream. Breeds with both CR and prl visible: Irish Cob, Lusitano, PRE, Quarter Horse, Mustang.</span>
+    </div>
+
+    <div class="general-note-item">
+      <span class="gnote-badge mechanic">in-game mechanic</span>
+      <span class="gnote-text"><strong>Sooty (STY) is dominant on bay-based coats,</strong> bay (A), wild bay (A+), seal bay (At), and their cream dilutes (buckskin, seal buckskin): a single copy (STY/n) is sufficient to display sooty shading. <strong>On chestnut/red-based coats STY is recessive</strong> in most breeds, requiring two copies (STY/STY) to show. <strong>Black (a/a) horses never express sooty</strong> regardless of copy count, sooty is fully masked on a black base but can still be inherited. Exceptions to the recessive-on-red rule: <strong>Lusitano, Trakehner, Oldenburger, and Haflinger</strong> treat STY as <strong>incomplete dominant on chestnut</strong>, meaning STY/n and STY/STY produce different visible expressions (red flaxen remains recessive in Oldenburger and Trakehner. Only Lusitano stays incomplete dominant on red flaxen). Additional masking: sooty is hidden on <strong>foals</strong>, under <strong>Grey (G)</strong>, on <strong>double dilutes</strong> (Cr/Cr, Cr/prl, prl/prl, mu/mu), and under <strong>Dun</strong> in all breeds except Kathiawari (the only breed with sooty dun coats).</span>
+    </div>
+
+  </div>
+</div>
+
+<div class="wrap">
+<table>
+<thead>
+  <tr>
+    <th>Breed</th>
+    <th>Status</th>
+    <th>Visible genes</th>
+    <th>Hidden genes</th>
+    <th>Whites in-game</th>
+    <th>Suspected / not yet</th>
+    <th>No evidence</th>
+    <th>Notes</th>
+  </tr>
+</thead>
+<tbody id="tb"></tbody>
+</table>
+<div class="no-results" id="nr" style="display:none">No breeds match your filters.</div>
+</div>
+
+<script>
+var D=[
+  {b:"Akhal-Teke",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Non-Dun1 (Nd1)"],h:["Seal Brown (At)","Wild Bay (A+)","Sooty (STY)","Flaxen (f)"],w:["Rabicano (rb)","Sabino hidden (Y)","White Markings (WM)"],su:["Dun (D)","SW like mutation"],n:["Pangaré (PA)","Pearl (prl)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","KIT-W20","KIT-Roan (RN)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)"],notes:"SW-like mutation suspected, may produce white spotting-like patterns with no identified testable cause. Hidden sabino (Y) expression varies with presence of other genes."},
+  {b:"Arabian",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["Rabicano (rb)","Sabino hidden (Y)","White Markings (WM)","KIT-W3","KIT-W19"],su:["KIT-W15","KIT-W20","KIT-W23","Non-Dun1 (Nd1)","KIT-W34"],n:["Pangaré (PA)","Cream (CR)","Pearl (prl)","Dun (D)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)"],notes:"W3 and W19 are breed-specific white spotting alleles. W15, W23, W34 suspected but not yet confirmed in-game. Dataset marked incomplete, more whites may be added."},
+  {b:"Brabant Horse",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)"],h:["Seal Brown (At)","Pangaré (PA)","Flaxen (f)","Sooty (STY)"],w:["KIT-Roan (RN)","White Markings (WM)"],su:[],n:["Wild Bay (A+)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-W20"],notes:"Wild Bay (A+) has no evidence in this breed, agouti is effectively A/At/a only. Pangaré is hidden but present, only affects chestnut and bay bases, not black."},
+  {b:"Brumby",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Silver (Z)","Dun (D)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)","Grey (G)","Cream (CR)"],w:["KIT-Tobiano (TO)","KIT-Roan (RN)","White Markings (WM)"],su:["Non-Dun1 (Nd1)","Sabino hidden (Y)","KIT-W20","Rabicano (rb)"],n:["Pearl (prl)","Champagne (CH)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","KIT-Sabino1 (SB1)"],notes:"Grey and Cream are hidden in this breed despite being present, horses carry them but they are not visible in test results. Silver (Z) is visible and only affects black pigment, chestnuts can only carry it silently."},
+  {b:"Camargue Horse",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)"],h:["Seal Brown (At)","Flaxen (f)"],w:["White Markings (WM)"],su:["Sabino hidden (Y)","MITF-SW1"],n:["Wild Bay (A+)","Pangaré (PA)","Sooty (STY)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Camargues are typically born dark and lighten significantly with age, this is not a greying effect in-game. Dataset incomplete, breed is known for limited genetic diversity."},
+  {b:"Cleveland Bay",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)"],su:[],n:["Wild Bay (A+)","Pangaré (PA)","Grey (G)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Breed is predominantly bay, Grey and most dilutes have no evidence. Agouti is effectively A/At/a only (no Wild Bay evidence). White markings are minimal by breed standard."},
+  {b:"Exmoor Pony",s:"complete",v:["Agouti (A)","Dun (D)"],h:["Seal Brown (At)","Sooty (STY)","Pangaré (PA)"],w:["N/A"],su:["Non-Dun1 (Nd1)"],n:["Black (E)","Chestnut (e)","Wild Bay (A+)","Flaxen (f)","Grey (G)","Cream (CR)","Pearl (prl)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","White Markings (WM)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Extension (E/e) has no evidence, breed is effectively fixed for a bay/dun base. Black and Chestnut cannot appear. No white patterns implemented. Pangaré is present as a hidden gene and typical for the breed."},
+  {b:"Finnhorse",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Cream (CR)","Silver (Z)","Grey (G)"],h:["Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["MITF-SW1","White Markings (WM)","Rabicano (rb)","Sabino hidden (Y)","KIT-Roan (RN)"],su:["Non-Dun1 (Nd1)"],n:["Wild Bay (A+)","Pearl (prl)","Dun (D)","Champagne (CH)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-W20"],notes:"Silver (Z) only dilutes black pigment, chestnut Finnhorses can only carry it silently. Rabicano (rb) is recessive and hidden, requires two copies to show. Roan shows only from age 3 in-game."},
+  {b:"Fjord Horse",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Cream (CR)","Dun (D)","Pangaré (PA)"],h:[],w:["N/A"],su:["White Markings (WM)","Non-Dun1 (Nd1)"],n:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Sooty (STY)","Grey (G)","Pearl (prl)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Fjords are known for exceptionally rich dun traits, dorsal stripe, leg bars, frosting and face mask. Breed typically presents as dun, Pangaré is visible and standard. No hidden genes listed, unusually transparent genetics for this breed."},
+  {b:"Friesian",s:"complete",v:["Black (E)","Chestnut (e)"],h:["Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)"],su:[],n:["Bay (A)","Wild Bay (A+)","Seal Brown (At)","Pangaré (PA)","Grey (G)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Agouti has no evidence at all, breed is effectively fixed black (a/a). Bay, Wild Bay and Seal Brown cannot appear. Chestnut (e/e) technically possible but extremely rare and controversial in real Friesians. White markings are minimal by breed standard, no other white patterns implemented."},
+  {b:"Haflinger",s:"complete",v:["Chestnut (e)","Agouti (A)","Non-Dun1 (Nd1)"],h:["Wild Bay (A+)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["White Markings (WM)","Rabicano (rb)"],su:["PATN1","KIT-W20","KIT-Sabino1 (SB1)"],n:["Black (E)","Seal Brown (At)","Grey (G)","Cream (CR)","Pearl (prl)","Dun (D)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","KIT-Tobiano (TO)","KIT-Roan (RN)"],notes:"Black (E) has no evidence, breed is chestnut-fixed (e/e). Flaxen is hidden but fixed in the breed. All Haflingers are exclusively flaxen chestnuts. Nd1 causes primitive markings (dorsal stripe) without full dun dilution. Rabicano is recessive hidden, needs two copies. STY is incomplete dominant on chestnut: STY/n and STY/STY produce visibly different expressions on red coats. Sooty hides pangaré in this breed instead of combining with it. No sooty pangaré coat exists (unique to Haflingers)."},
+  {b:"Icelandic Horse",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Dun (D)","Silver (Z)","Cream (CR)","Non-Dun1 (Nd1)"],h:["Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["MITF-SW1","White Markings (WM)","KIT-Tobiano (TO)","KIT-Roan (RN)","KIT-W21","KIT-W8"],su:["Wild Bay (hidden)"],n:["Pearl (prl)","Champagne (CH)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","Sabino hidden (Y)","KIT-Sabino1 (SB1)","KIT-W20"],notes:"W8 and W21 are Icelandic-specific white spotting alleles. Silver (Z) only affects black pigment. Roan shows from age 3 in-game. Icelandics have a large variety of recognised coat colours, one of the most genetically diverse breeds in-game."},
+  {b:"Irish Cob Horse",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Cream (CR)","Pearl (prl)","Silver (Z)","Dun (D)","Grey (G)"],h:["Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["White Markings (WM)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","Leopard Complex (LP)","MITF-SW1"],su:["KIT-W20","Snowdrop (sno)","Non-Dun1 (Nd1)"],n:["Wild Bay (A+)","Champagne (CH)","Mushroom (Mu)","Frame (OLW)","Rabicano (rb)","Sabino hidden (Y)"],notes:"Cream and Pearl share a locus, a horse cannot be CR/CR and prl/prl simultaneously. SB1/SB1 homozygous usually results in a nearly white horse. Snowdrop (sno) is a suspected breed-specific modifier. LP (Leopard Complex) is present, an unusual trait for a cob breed."},
+  {b:"Kathiawari",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Dun (D)","Non-Dun1 (Nd1)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["MITF-SW1","White Markings (WM)","Sabino hidden (Y)"],su:["KIT-Sabino1 (SB1)","KIT-Tobiano (TO)","KIT-W20"],n:[],notes:"One of the few breeds with no 'no evidence' column, genetics are well-documented. Sabino hidden (Y) is recessive and requires two copies to show. Nd1 gives primitive markings without dun dilution. STY is the only breed in-game where sooty expresses on dun coats."},
+  {b:"Kladruber",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)","Rabicano (rb)"],su:[],n:["Wild Bay (A+)","Pangaré (PA)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","KIT-Tobiano (TO)","Sabino hidden (Y)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Predominantly grey or black breed. Rabicano is hidden recessive, needs two copies to show. Dataset incomplete, dilutes and white patterns largely absent from this breed."},
+  {b:"Knabstrupper",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Dun (D)","Non-Dun1 (Nd1)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["Leopard Complex (LP)","PATN1","PATN2 (Hidden)","White Markings (WM)","KIT-Roan (RN)"],su:["KIT-W20","MITF-SW1","Wild Bay (hidden)","Silver (Z)","Cream (CR)"],n:["Pangaré (PA)","Grey (G)","Pearl (prl)","Champagne (CH)","Mushroom (Mu)","Frame (OLW)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)"],notes:"LP (Leopard Complex) is the defining pattern of this breed. LP is incomplete dominant: LP/lp horses have leopard spots, LP/LP horses have few or no spots (snowcap/few-spot). PATN1 and hidden PATN2 (Hidden) control the amount of white. Silver and Cream are only suspected."},
+  {b:"Lipizzaner",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Non-Dun1 (Nd1)"],h:["Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)","Sabino hidden (Y)","KIT-Roan (RN)","KIT-W20"],su:["PAX3-SW2"],n:["Wild Bay (A+)","Pangaré (PA)","Dun (D)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Snowdrop (sno)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)"],notes:"Lipizzaners are born dark and turn grey with age, Grey (G) is the dominant and most iconic trait of this breed. Foals show hyperpigmentation. Grey overrides all other colour expression visually at adulthood. In-game, adult grey phenotype is chosen randomly from the breed pool."},
+  {b:"Lusitano",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Pearl (prl)","Non-Dun1 (Nd1)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)"],su:["Dun (D)","Rabicano (rb)","KIT-W20","KIT-Roan (RN)","SW like mutation","Sabino hidden (Y)"],n:["Wild Bay (A+)","Pangaré (PA)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)"],notes:"Cream and Pearl share a locus, cannot be CR/CR and prl/prl simultaneously. SW-like mutation suspected (similar to Akhal-Teke). Dataset incomplete. Closely related to PRE/Andalusian, genetics overlap significantly. STY is incomplete dominant on all base coats including red flaxen: STY/n and STY/STY produce visibly different expressions. No sooty seal buckskin artwork (reported as a bug)."},
+  {b:"Mongolian Horse",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Dun (D)","Non-Dun1 (Nd1)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["Leopard Complex (LP)","PATN1","PATN2 (Hidden)","MITF-SW1","White Markings (WM)","KIT-Tobiano (TO)","KIT-Roan (RN)"],su:[],n:["Pearl (prl)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Rabicano (rb)","Sabino hidden (Y)","KIT-Sabino1 (SB1)","KIT-W20"],notes:"LP (Leopard Complex) is present, unusual for an Asian breed. PATN2 (Hidden) is hidden but in-game. Roan shows from age 3 in-game. One of the more complete datasets with no suspected column entries."},
+  {b:"Mustang",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Cream (CR)","Pearl (prl)","Dun (D)","Champagne (CH)","Silver (Z)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["Frame (OLW)","White Markings (WM)","KIT-Tobiano (TO)","KIT-Roan (RN)"],su:["Grey (G)","Leopard Complex (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","MITF-SW1","KIT-W20","KIT-W34","Non-Dun1 (Nd1)","KIT-Sabino1 (SB1)"],n:["Mushroom (Mu)"],notes:"⚠ Frame (OLW) present, breeding two OLW carriers gives 25% chance of Overo Lethal White Syndrome (OLWS). Affected foals are born with underdeveloped intestines and must be euthanised. In-game you receive a notification. Cream and Pearl share a locus. One of the most genetically diverse breeds in-game. Grey and LP only suspected."},
+  {b:"Namib Desert Horse",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Non-Dun1 (Nd1)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["White Markings (WM)"],su:["Lacing"],n:["Grey (G)","Cream (CR)","Pearl (prl)","Dun (D)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Nd1 gives primitive markings (dorsal stripe) without dun body dilution. Lacing is a suspected breed-specific modifier with unknown genetics, causes a lace-like lighter pattern on the coat. Dataset very incomplete, most dilutes and whites absent."},
+  {b:"Noriker",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["Leopard Complex (LP)","PATN1","PATN2 (Hidden)","White Markings (WM)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Roan (RN)"],su:["KIT-W20","KIT-W17","PAX3-SW2","KIT-Sabino1 (SB1)","Grey (G)"],n:["Wild Bay (A+)","Pangaré (PA)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Rabicano (rb)"],notes:"Norikers are always flaxen carriers (f/f or F/f). LP (Leopard Complex) is present, Norikers can have appaloosa-style patterns. Sabino hidden (Y) is recessive and requires two copies (Y/Y) to visually manifest in this breed."},
+  {b:"Norman Cob",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)"],su:["Sabino hidden (Y)"],n:["Wild Bay (A+)","Pangaré (PA)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Frame (OLW)","Mushroom (Mu)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Relatively simple genetics for a draft breed. Sooty is hidden and darkens chestnut and bay coats, does not affect black. Grey is dominant and overrides all colour expression at adulthood in-game."},
+  {b:"Oldenburg",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Non-Dun1 (Nd1)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)","KIT-Tobiano (TO)","KIT-W16"],su:["KIT-W20","KIT-W22","MITF-SW1"],n:["Wild Bay (A+)","Pangaré (PA)","Pearl (prl)","Dun (D)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","Sabino hidden (Y)","KIT-Sabino1 (SB1)","KIT-Roan (RN)"],notes:"W16 is a breed-specific white spotting allele. W20, W22 suspected. Dataset incomplete, warmblood breed with emerging white spotting documentation. STY is incomplete dominant on chestnut (STY/n and STY/STY differ) but recessive on red flaxen. No sooty bay, buckskin, or seal buckskin artwork after the artwork redo."},
+  {b:"Pantaneiro",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Dun (D)","Non-Dun1 (Nd1)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)","KIT-Roan (RN)"],su:[],n:["Wild Bay (A+)","Pangaré (PA)","Pearl (prl)","Champagne (CH)","Mushroom (Mu)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-W20"],notes:"South American breed with a complete dataset and no suspected entries. Roan shows from age 3 in-game. Nd1 causes primitive markings without dun dilution."},
+  {b:"PRE (Andalusian)",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Pearl (prl)"],h:["Seal Brown (At)","Flaxen (f)"],w:["White Markings (WM)","Rabicano (rb)"],su:["Non-Dun1 (Nd1)","Dun (D)","Sooty (STY)","KIT-W20","MITF-SW9","MITF-SW10"],n:["Wild Bay (A+)","Pangaré (PA)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)"],notes:"Cream and Pearl share a locus, cannot be CR/CR and prl/prl simultaneously. SW9 and SW10 are suspected breed-specific splashed white alleles. Rabicano is hidden recessive, needs two copies to show. Closely related to Lusitano. Dataset incomplete."},
+  {b:"Quarter Horse",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Cream (CR)","Pearl (prl)","Dun (D)","Champagne (CH)","Silver (Z)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)"],w:["Frame (OLW)","MITF-SW1","White Markings (WM)","Rabicano (rb)","KIT-Roan (RN)","KIT-W10"],su:["PAX3-SW2","KIT-W20","Leopard Complex (LP)","PATN1","PATN2 (Hidden)","Non-Dun1 (Nd1)","Sooty (STY)","Grey (G)","MITF-SW3","KIT-W31","KIT-W34","KIT-Sabino1 (SB1)","KIT-W22","MITF-SW7","MITF-SW5","MITF-SW6"],n:["Pangaré (PA)","Mushroom (Mu)","Sabino hidden (Y)","KIT-Tobiano (TO)"],notes:"⚠ Frame (OLW) present, breeding two OLW carriers gives 25% chance of Overo Lethal White Syndrome (OLWS). Foals born OLW/OLW cannot survive and are euthanised in-game. Cream and Pearl share a locus. W10 is a breed-specific white spotting allele. One of the most genetically complex breeds with many suspected whites. Champagne and Silver are visible, Quarter Horses are one of the few breeds with testable Champagne."},
+  {b:"Shetland Pony",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Dun (D)","Non-Dun1 (Nd1)","Silver (Z)","Mushroom (Mu)"],h:["Wild Bay (A+)","Seal Brown (At)","Flaxen (f)","Pangaré (PA)","Sooty (STY)"],w:["MITF-SW1","White Markings (WM)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)"],su:["KIT-W13","KIT-W20","Rabicano (rb)"],n:["Pearl (prl)","Champagne (CH)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Sabino hidden (Y)"],notes:"Mushroom (mu) is recessive, needs two copies to show, dilutes red pigment to sepia tones on chestnut and bay. Silver (Z) only dilutes black pigment, chestnut Shetlands can only carry it silently. SB1/SB1 homozygous usually produces a nearly white horse. Roan shows from age 3 in-game. One of the most diverse pony breeds in-game."},
+  {b:"Shire Horse",s:"complete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)","Sabino hidden (Y)","KIT-W20"],su:[],n:["Wild Bay (A+)","Pangaré (PA)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)"],notes:"W20 is viable when homozygous (W20/W20), unique among white spotting alleles in-game. All other homozygous white spotting combinations are embryonic lethal (failed covering). Sabino hidden (Y) is recessive and hidden. Complete dataset with no suspected entries."},
+  {b:"Suffolk Punch",s:"complete",v:["Chestnut (e)","Agouti (A)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)"],su:[],n:["Black (E)","Bay (A)","Wild Bay (A+)","Pangaré (PA)","Grey (G)","Cream (CR)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)","KIT-Roan (RN)","KIT-W20"],notes:"Black (E) has no evidence, breed is chestnut-fixed (e/e). All Suffolk Punches are chestnut. Bay (A) allele also absent, agouti is irrelevant to coat colour here (only matters for passing alleles to offspring). Flaxen is hidden but common, giving characteristic bright manes."},
+  {b:"Thoroughbred (TB)",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)","Non-Dun1 (Nd1)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)","Wild Bay (A+)"],w:["Frame (OLW)","White Markings (WM)","Rabicano (rb)","KIT-Roan (RN)"],su:["KIT-W20","KIT-W5","KIT-W6","KIT-W7","KIT-W14","KIT-W22","KIT-W25","KIT-W26","KIT-W27","KIT-W2","MITF-SW8"],n:["Pearl (prl)","Dun (D)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Leopard (LP)","PATN1","PATN2 (Hidden)","Pangaré (PA)","Sabino hidden (Y)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)"],notes:"⚠ Frame (OLW) present, breeding two OLW carriers gives 25% chance of Overo Lethal White Syndrome (OLWS). Many white spotting alleles suspected (W2, W5–W7, W14, W22, W25–W27) reflecting real-world TB white spotting research. Dataset incomplete with many whites under investigation."},
+  {b:"Trakehner Horse",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Grey (G)","Cream (CR)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["KIT-Tobiano (TO)","KIT-Roan (RN)","White Markings (WM)","MITF-SW1"],su:["Sabino hidden (Y)"],n:["Wild Bay (A+)","Pangaré (PA)","Pearl (prl)","Dun (D)","Non-Dun1 (Nd1)","Champagne (CH)","Silver (Z)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","Rabicano (rb)","KIT-Sabino1 (SB1)","KIT-W20"],notes:"Warmblood breed with relatively straightforward genetics. Roan shows from age 3 in-game. Tobiano is present, creates vertical white patches crossing the topline, homozygous (TO/TO) horses often show ink spots (cat tracks) in white areas. STY is incomplete dominant on all base coats except red flaxen (recessive on red flaxen). No sooty seal bay or cream coats."},
+  {b:"Welsh Ponies (A-B)",s:"incomplete",v:["Black (E)","Chestnut (e)","Agouti (A)","Cream (CR)","Grey (G)","Dun (D)","Silver (Z)"],h:["Seal Brown (At)","Flaxen (f)","Sooty (STY)"],w:["White Markings (WM)","MITF-SW1","KIT-Roan (RN)","Sabino hidden (Y)","Rabicano (rb)"],su:["Non-Dun1 (Nd1)","KIT-W20","Pangaré (PA)"],n:["Wild Bay (A+)","Pearl (prl)","Champagne (CH)","Mushroom (Mu)","Frame (OLW)","Leopard (LP)","PATN1","PATN2 (Hidden)","KIT-Tobiano (TO)","KIT-Sabino1 (SB1)"],notes:"Covers both Section A and B Welsh Ponies. Silver (Z) only dilutes black pigment. Rabicano is hidden recessive, needs two copies to show. Roan shows from age 3 in-game. Dataset incomplete."}
+];
+
+function tags(arr, cls) {
+  if (!arr || arr.length === 0) return '<span class="empty">—</span>';
+  return arr.map(function(t) { return '<span class="tag ' + cls + '">' + t + '</span>'; }).join('');
+}
+
+function render(data) {
+  var tb = document.getElementById('tb');
+  var nr = document.getElementById('nr');
+  if (data.length === 0) {
+    tb.innerHTML = '';
+    nr.style.display = 'block';
+  } else {
+    nr.style.display = 'none';
+    tb.innerHTML = data.map(function(d) {
+      return '<tr>' +
+        '<td><span class="breed-name">' + d.b + '</span></td>' +
+        '<td><span class="status ' + d.s + '">' + d.s + '</span></td>' +
+        '<td><div class="tags">' + tags(d.v, 'tv') + '</div></td>' +
+        '<td><div class="tags">' + tags(d.h, 'th2') + '</div></td>' +
+        '<td><div class="tags">' + tags(d.w, 'tw') + '</div></td>' +
+        '<td><div class="tags">' + tags(d.su, 'ts2') + '</div></td>' +
+        '<td><div class="tags">' + tags(d.n, 'tn') + '</div></td>' +
+        '<td><span class="note-text">' + (d.notes || '') + '</span></td>' +
+        '</tr>';
+    }).join('');
+  }
+  document.getElementById('cnt').textContent = data.length + ' of ' + D.length + ' breeds';
+}
+
+function filter() {
+  var q = document.getElementById('sq').value.toLowerCase();
+  var sf = document.getElementById('sf').value;
+  var active = [];
+  document.querySelectorAll('.pill.on').forEach(function(p) { active.push(p.dataset.l); });
+  var out = D.filter(function(d) {
+    if (q && d.b.toLowerCase().indexOf(q) < 0) return false;
+    if (sf && d.s !== sf) return false;
+    if (active.length > 0) {
+      var all = d.v.concat(d.h);
+      return active.every(function(l) { return all.some(function(g) { return g.indexOf(l) >= 0; }); });
+    }
+    return true;
+  });
+  render(out);
+}
+
+var LOCI = [
+  {label:'E (black)', key:'Black (E)'},
+  {label:'e (chestnut)', key:'Chestnut (e)'},
+  {label:'A (agouti)', key:'Agouti (A)'},
+  {label:'At (seal)', key:'Seal Brown'},
+  {label:'A+ (wild bay)', key:'Wild Bay'},
+  {label:'CR (cream)', key:'Cream (CR)'},
+  {label:'prl (pearl)', key:'Pearl (prl)'},
+  {label:'D (dun)', key:'Dun (D)'},
+  {label:'Nd1', key:'Non-Dun1'},
+  {label:'CH (champ)', key:'Champagne'},
+  {label:'Z (silver)', key:'Silver (Z)'},
+  {label:'Mu (mushroom)', key:'Mushroom'},
+  {label:'G (grey)', key:'Grey (G)'},
+  {label:'f (flaxen)', key:'Flaxen'},
+  {label:'STY (sooty)', key:'Sooty'},
+  {label:'PA (pangaré)', key:'Pangaré'}
+];
+
+var pDiv = document.getElementById('pills');
+LOCI.forEach(function(l) {
+  var p = document.createElement('span');
+  p.className = 'pill';
+  p.textContent = l.label;
+  p.dataset.l = l.key;
+  p.onclick = function() { p.classList.toggle('on'); filter(); };
+  pDiv.appendChild(p);
+});
+
+document.getElementById('sq').addEventListener('input', filter);
+document.getElementById('sf').addEventListener('change', filter);
+
+render(D);
+</script>
+</body>
+</html>
