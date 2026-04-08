@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HR Genetics</title>
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+  <div id="hr-app">
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- VIEW: Pairing list (default view)                                   -->
+    <!-- ------------------------------------------------------------------ -->
+    <div id="view-list">
+      <header id="app-header">
+        <h1>HR Genetics</h1>
+        <button id="btn-close-panel" type="button" title="Close panel">×</button>
+      </header>
+
+      <div id="pairing-list">
+        <!-- Pairing cards injected here by horseSelector.js -->
+      </div>
+
+      <div id="empty-state" class="hidden">
+        <p>No pairings yet.</p>
+        <p class="hint">Visit a horse profile and click<br>"Set as Dam" or "Set as Sire".</p>
+      </div>
+
+      <footer id="list-footer">
+        <button id="btn-new-pairing" type="button">+ New Pairing</button>
+      </footer>
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- VIEW: Results for a selected complete pairing                       -->
+    <!-- ------------------------------------------------------------------ -->
+    <div id="view-results" class="hidden">
+      <header id="results-header">
+        <button id="btn-back" type="button">&#8592; Back</button>
+        <span id="results-pairing-name"></span>
+      </header>
+
+      <!-- Hidden gene toggles (A+/At ambiguity) for dam and sire -->
+      <div id="hidden-gene-section">
+        <div id="hidden-genes-dam"  class="hidden-gene-group"></div>
+        <div id="hidden-genes-sire" class="hidden-gene-group"></div>
+      </div>
+
+      <!-- Offspring table injected here by resultsPanel.js -->
+      <div id="results-content"></div>
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- MODAL: Pick prompt, shown when HR_PICK_HORSE arrives               -->
+    <!-- ------------------------------------------------------------------ -->
+    <div id="modal-overlay" class="hidden">
+      <div id="modal-pick-prompt">
+        <div id="modal-horse-info">
+          <!-- Horse name + breed + role injected by horseSelector.js -->
+        </div>
+        <div id="modal-actions">
+          <!-- Buttons injected by horseSelector.js -->
+        </div>
+        <button id="btn-cancel-pick" type="button">Cancel</button>
+      </div>
+    </div>
+
+  </div><!-- /#hr-app -->
+
+  <script type="module" src="sidebar.js"></script>
+</body>
+</html>

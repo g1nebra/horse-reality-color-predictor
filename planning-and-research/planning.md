@@ -527,6 +527,37 @@ Maps genotype signatures to human-readable HR colour names. **Deferred beyond v1
 **Deliverables:** Tobiano, Roan (age-3 display note), Frame (OLWS warning), SB1, LP + PATN1/PATN2, W-series, Splashed White, HR-custom patterns (Y, rb, WM, sno). Full lethal combo detection.  
 **Ready when:** After Phase 7.
 
+### Phase 9, Results Summary View
+**Goal:** Make results readable at a glance for horses with many loci (e.g. Norikers with E + A + LP + PATN1 + KIT = 72 combinations).
+
+**Deliverables:**
+
+#### 9.1 Per-locus probability summary (always shown above the table)
+Collapse all outcomes by a single locus to answer "what are the odds my foal carries X?".  
+For each locus in the shared set, show a mini breakdown:
+
+| Locus | Outcome | % |
+|-------|---------|---|
+| KIT   | RN/TO   | 37.5% |
+| KIT   | RN/RN   | 12.5% |
+| LP    | lp/lp   | 50% |
+| …     | …       | … |
+
+Implementation: group `calculateOffspring` results by one locus at a time, sum probabilities for each distinct allele pair. One pass per locus, O(n) per locus.
+
+#### 9.2 Combination filter (interactive)
+Checkboxes or chips for each locus outcome (e.g. "LP/lp ✓", "RN/TO ✓"). When one or more are checked, the full genotype table below filters to only rows that include ALL selected criteria and shows the combined probability at the top ("Probability of this combination: 18.75%").
+
+Implementation: the full outcomes array is already in memory, filtering is client-side. No engine changes needed.
+
+#### 9.3 UX layout
+- Summary strip above the genotype table (collapsible).
+- Combination chips row below the summary.
+- Full genotype table remains, now filtered by active chips.
+- "Clear filters" button resets to showing all rows.
+
+**Ready when:** After Phase 6 (v1 stable). No engine changes needed, pure UI on top of existing `calculateOffspring` output.
+
 ---
 
 ## 8. Open Questions

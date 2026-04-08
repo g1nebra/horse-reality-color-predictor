@@ -1,0 +1,11 @@
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.user
+*.zip
+*.crx
+*.pem
+node_modules/

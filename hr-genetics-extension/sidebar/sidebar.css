@@ -1,0 +1,684 @@
+/*
+   HR Genetics | Sidebar Styles
+   Palette: Horse Reality official primary scale (900–000)
+   Font: Roboto, sans-serif
+    */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* HR colour variables (official scale) */
+
+:root {
+  --p900: #081b28;
+  --p800: #0b2c41;
+  --p700: #1c5072;
+  --p600: #407f9c;
+  --p500: #5d95ad;
+  --p400: #7aaabd;
+  --p300: #98c0cd;
+  --p200: #bad5de;
+  --p100: #d2e4e9;
+  --p000: #e7f0f3;
+  --white: #ffffff;
+
+  --gold:  #c8861a;
+  --red:   #b83232;
+  --green: #2e8b57;
+
+  --dam-color:  #6a3d9b;
+  --sire-color: #1c5072;
+}
+
+/* Reset & base */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  background: var(--p000);
+  color: var(--p900);
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+.hidden { display: none !important; }
+
+/* App shell */
+
+#hr-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+
+#app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--p900);
+  border-bottom: 2px solid var(--p700);
+  flex-shrink: 0;
+}
+
+#app-header h1 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  text-transform: uppercase;
+}
+
+#btn-close-panel {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 16px;
+  color: var(--p300);
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+#btn-close-panel:hover {
+  background: rgba(255,255,255,0.15);
+  color: var(--white);
+}
+
+/* VIEW: Pairing list */
+
+#view-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+#pairing-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--p500);
+  text-align: center;
+  padding: 24px;
+}
+
+#empty-state .hint {
+  font-size: 11px;
+  color: var(--p400);
+  line-height: 1.6;
+}
+
+#list-footer {
+  padding: 10px;
+  border-top: 1px solid var(--p200);
+  background: var(--white);
+  flex-shrink: 0;
+}
+
+#btn-new-pairing {
+  width: 100%;
+  padding: 8px;
+  background: var(--white);
+  border: 1px dashed var(--p600);
+  border-radius: 4px;
+  color: var(--p600);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+#btn-new-pairing:hover {
+  background: var(--p000);
+  color: var(--p700);
+  border-color: var(--p700);
+}
+
+/* Pairing card */
+
+.pairing-card {
+  background: var(--white);
+  border: 1px solid var(--p200);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pairing-card:hover {
+  border-color: var(--p500);
+  box-shadow: 0 2px 6px rgba(8,27,40,0.1);
+}
+
+.pairing-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 9px;
+  background: var(--p700);
+}
+
+.pairing-card-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  cursor: text;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pairing-card-name:hover {
+  text-decoration: underline dotted rgba(255,255,255,0.5);
+}
+
+.pairing-name-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 3px;
+  color: var(--white);
+  font-family: 'Roboto', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  outline: none;
+}
+
+.pairing-name-input:focus {
+  border-color: var(--p300);
+  background: rgba(255,255,255,0.2);
+}
+
+.pairing-card-actions { display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
+
+.btn-icon {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.btn-icon:hover {
+  background: rgba(255,255,255,0.2);
+  color: var(--white);
+}
+
+.btn-icon.btn-delete:hover,
+.btn-icon.btn-delete[data-confirm="pending"] {
+  background: rgba(184,50,50,0.35);
+  color: #ffaaaa;
+}
+
+.btn-icon[data-confirm="pending"] {
+  font-size: 10px;
+  padding: 0 6px;
+  background: rgba(255,255,255,0.15);
+  color: var(--white);
+}
+
+/* Reuse button sits inside the horse info block, not the header */
+.btn-reuse {
+  color: var(--p400);
+  font-size: 12px;
+  margin-top: auto;
+  padding: 0;
+  min-width: unset;
+  height: auto;
+}
+.btn-reuse:hover { color: var(--p700); background: none; }
+
+.pairing-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--p200);
+  align-items: stretch;  /* both cells equal height */
+}
+
+.horse-slot {
+  background: var(--white);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 88px;
+  min-width: 0;
+  position: relative;
+}
+
+.horse-slot-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--p500);
+}
+
+.horse-slot.slot-dam .horse-slot-label  { color: var(--dam-color); }
+.horse-slot.slot-sire .horse-slot-label { color: var(--sire-color); }
+
+.horse-slot-content {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Stacked PNG layers, each layer is absolutely positioned on top of the previous */
+.horse-photo-stack {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--p100);
+  border: 1px solid var(--p200);
+}
+
+.horse-photo-stack img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Fallback emoji, hidden by default, shown if all imgs fail */
+.horse-photo-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--p400);
+  z-index: -1; /* behind imgs; visible when all imgs have display:none */
+}
+
+.horse-photo-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 3px;
+  background: var(--p100);
+  border: 1px dashed var(--p300);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--p400);
+}
+
+.horse-info { flex: 1; min-width: 0; overflow: hidden; }
+
+.horse-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--p900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.horse-breed {
+  font-size: 10px;
+  color: var(--p500);
+  margin-top: 1px;
+}
+
+.badge-partial {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 5px;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffe08a;
+  border-radius: 3px;
+  margin-top: 3px;
+}
+
+.horse-slot-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--p300);
+  font-size: 11px;
+  font-style: italic;
+}
+
+.btn-clear-slot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 15px;
+  height: 15px;
+  font-size: 11px;
+  color: var(--p400);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-clear-slot:hover {
+  background: #fde8e8;
+  color: var(--red);
+}
+
+/* Complete pairing, slots area is clickable */
+.pairing-card.complete .pairing-slots { cursor: pointer; }
+
+.pairing-card.complete .pairing-slots:hover .horse-slot {
+  background: var(--p000);
+}
+
+/* VIEW: Results */
+
+#view-results {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+#results-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--p800);
+  border-bottom: 1px solid var(--p700);
+  flex-shrink: 0;
+}
+
+#btn-back {
+  font-size: 13px;
+  color: var(--p300);
+  padding: 3px 7px;
+  border-radius: 3px;
+  transition: background 0.12s, color 0.12s;
+}
+
+#btn-back:hover {
+  background: rgba(255,255,255,0.15);
+  color: var(--white);
+}
+
+#results-pairing-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--p200);
+}
+
+/* Hidden gene section */
+
+#hidden-gene-section {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--p200);
+  background: var(--p000);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#hidden-gene-section:empty { display: none; }
+
+.hidden-gene-group { display: flex; flex-direction: column; gap: 4px; }
+.hidden-gene-group:empty { display: none; }
+
+.hidden-gene-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--p600);
+  margin-bottom: 2px;
+}
+
+.hidden-gene-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hidden-gene-name {
+  font-size: 11px;
+  color: var(--p900);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.hidden-gene-slot { display: flex; align-items: center; gap: 4px; }
+
+.hidden-gene-slot label { font-size: 10px; color: var(--p500); }
+
+.hidden-gene-slot select {
+  background: var(--white);
+  border: 1px solid var(--p300);
+  border-radius: 3px;
+  color: var(--p900);
+  font-family: 'Roboto', sans-serif;
+  font-size: 11px;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.hidden-gene-slot select:focus {
+  outline: 2px solid var(--p600);
+  outline-offset: -1px;
+}
+
+/* Results content */
+
+#results-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background: var(--white);
+}
+
+.results-panel { display: flex; flex-direction: column; gap: 10px; }
+
+.results-summary { font-size: 11px; color: var(--p500); }
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.results-table thead tr { background: var(--p900); }
+
+.results-table thead th {
+  text-align: left;
+  padding: 5px 7px;
+  color: var(--p100);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 10px;
+}
+
+.results-table thead th.col-prob { text-align: right; }
+
+.results-table tbody tr:nth-child(odd)  { background: var(--white); }
+.results-table tbody tr:nth-child(even) { background: var(--p000); }
+.results-table tbody tr:hover           { background: var(--p100); }
+.results-table tbody tr { border-bottom: 1px solid var(--p100); }
+
+.results-table td { padding: 5px 7px; vertical-align: top; }
+
+.genotype-cell {
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--p900);
+  line-height: 1.6;
+}
+
+.genotype-locus {
+  color: var(--p600);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.col-prob {
+  text-align: right;
+  font-weight: 700;
+  color: var(--gold);
+  white-space: nowrap;
+  padding-left: 10px;
+}
+
+.results-empty {
+  color: var(--p500);
+  font-size: 12px;
+  text-align: center;
+  padding: 24px;
+}
+
+/* Modal: Pick prompt */
+
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8,27,40,0.7);
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+#modal-pick-prompt {
+  background: var(--white);
+  border: 1px solid var(--p300);
+  border-radius: 5px;
+  width: 288px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(8,27,40,0.4);
+}
+
+#modal-horse-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px 10px;
+  background: var(--p900);
+}
+
+.modal-horse-name { font-size: 14px; font-weight: 700; color: var(--white); }
+.modal-horse-breed { font-size: 11px; color: var(--p300); }
+
+.modal-role-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-top: 3px;
+  width: fit-content;
+}
+
+.modal-role-badge.role-dam  { background: var(--dam-color);  color: #fff; }
+.modal-role-badge.role-sire { background: var(--sire-color); color: #fff; }
+
+#modal-actions {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 5px;
+  background: var(--p000);
+}
+
+.btn-pick-action {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--white);
+  border: 1px solid var(--p300);
+  border-radius: 3px;
+  color: var(--p900);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.btn-pick-action:hover {
+  background: var(--p100);
+  border-color: var(--p600);
+}
+
+.btn-pick-action.btn-create-new {
+  background: var(--p700);
+  border-color: var(--p700);
+  color: var(--white);
+  font-weight: 700;
+}
+
+.btn-pick-action.btn-create-new:hover {
+  background: var(--p900);
+  border-color: var(--p900);
+}
+
+#btn-cancel-pick {
+  font-size: 11px;
+  color: var(--p500);
+  text-align: center;
+  padding: 7px;
+  width: 100%;
+  border-top: 1px solid var(--p200);
+  background: var(--white);
+  transition: background 0.12s, color 0.12s;
+}
+
+#btn-cancel-pick:hover {
+  background: var(--p000);
+  color: var(--p900);
+}
