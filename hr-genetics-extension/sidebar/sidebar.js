@@ -32,6 +32,8 @@ let pairings        = [];
 let currentView     = 'list';
 let activePairingId = null;
 let pendingPick     = null; // { horse, role }
+let initComplete    = false;
+let bufferedPickMsg = null; // holds HR_PICK_HORSE that arrived before init finished
 
 // DOM refs
 
@@ -54,6 +56,11 @@ const modalActions       = document.getElementById('modal-actions');
   pairings = await loadPairings();
   renderListView();
   bindStaticEvents();
+  initComplete = true;
+  if (bufferedPickMsg) {
+    handlePickHorse(bufferedPickMsg);
+    bufferedPickMsg = null;
+  }
 })();
 
 function bindStaticEvents() {
@@ -66,11 +73,16 @@ function bindStaticEvents() {
 }
 
 // Message listener, receives HR_PICK_HORSE relayed by topbar.js via postMessage
+// Buffer the message if it arrives before init() finishes loading pairings.
 
 window.addEventListener('message', (e) => {
   console.log('[HR Genetics sidebar] window message received:', e.data?.type, e.data);
   if (e.data?.type === 'HR_PICK_HORSE') {
-    handlePickHorse(e.data);
+    if (!initComplete) {
+      bufferedPickMsg = e.data;
+    } else {
+      handlePickHorse(e.data);
+    }
   }
 });
 

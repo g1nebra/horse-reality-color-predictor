@@ -534,6 +534,32 @@ button {
   margin-top: 6px;
 }
 
+.results-lethal-warning {
+  font-size: 11px;
+  color: #b71c1c;
+  background: #ffebee;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-top: 6px;
+}
+
+.lethal-row { background: #fff5f5; }
+
+.lethal-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #b71c1c;
+  background: #ffcdd2;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .results-table {
   width: 100%;
   border-collapse: collapse;

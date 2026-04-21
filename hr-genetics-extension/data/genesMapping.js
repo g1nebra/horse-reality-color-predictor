@@ -8,11 +8,11 @@ export default {
     "whites": ["rb","Y","WM"],
     "none": ["PA","prl","CH","Z","mu","OLW","LP","PATN1","PATN2","TO","SB1","RN","W20"]
   },
-  "Arabian": {
-    "visible": ["E","e","A","G"],
+  "Arabian Horse": {
+    "visible": ["E","A","G","CR","D","CH","Z","mu"],
     "hidden": ["A+","At","f","STY"],
-    "whites": ["rb","Y","WM","W3","W19"],
-    "none": ["PA","CR","prl","D","CH","Z","mu","OLW","LP","PATN1","PATN2","TO","SB1","RN"]
+    "whites": ["OLW","LP","PATN1","MITF","SW2","rb","Y","WM","W3","W10","W19","W21"],
+    "none": ["prl","TO","SB1","RN","PATN2","W20"]
   },
   "Brabant Horse": {
     "visible": ["E","e","A","G"],
@@ -21,10 +21,10 @@ export default {
     "none": ["A+","CR","prl","D","nd1","CH","Z","mu","OLW","LP","rb","Y","TO","SB1","W20"]
   },
   "Brumby": {
-    "visible": ["E","e","A","Z","D"],
-    "hidden": ["A+","At","f","PA","STY","CR","G"],
+    "visible": ["E","e","A","G","CR","D","Z"],
+    "hidden": ["A+","At","f","PA","STY"],
     "whites": ["TO","RN","WM"],
-    "none": ["prl","CH","mu","OLW","LP","PATN1","PATN2","SB1"]
+    "none": ["prl","CH","mu","OLW","LP","PATN1","PATN2","MITF","SW2","SB1","W3","W10","W19","W21","Y","W20","rb"]
   },
   "Camargue Horse": {
     "visible": ["E","e","A","G"],
@@ -48,7 +48,7 @@ export default {
   "Finnhorse": {
     "visible": ["E","e","A","CR","Z","G"],
     "hidden": ["At","f","PA","STY"],
-    "whites": ["MITF-SW1","WM","rb","Y","RN"],
+    "whites": ["MITF","WM","rb","Y","RN"],
     "none": ["A+","prl","CH","mu","OLW","LP","PATN1","PATN2","TO","SB1","W20"]
   },
   "Fjord Horse": {
@@ -74,19 +74,19 @@ export default {
   "Icelandic Horse": {
     "visible": ["E","e","A","G","D","nd1","Z","CR"],
     "hidden": ["At","f","PA","STY"],
-    "whites": ["MITF-SW1","WM","TO","RN","W8","W21"],
+    "whites": ["MITF","WM","TO","RN","W8","W21"],
     "none": ["prl","CH","mu","OLW","LP","PATN1","PATN2","rb","Y","SB1","W20"]
   },
   "Irish Cob": {
     "visible": ["E","e","A","CR","prl","Z","D","G"],
     "hidden": ["At","f","PA","STY"],
-    "whites": ["WM","TO","SB1","RN","LP","MITF-SW1"],
+    "whites": ["WM","TO","SB1","RN","LP","MITF"],
     "none": ["A+","CH","mu","OLW","rb","Y"]
   },
   "Kathiawari": {
     "visible": ["E","e","A","G","CR","D","nd1"],
     "hidden": ["A+","At","f","STY"],
-    "whites": ["MITF-SW1","WM","Y"],
+    "whites": ["MITF","WM","Y"],
     "none": []
   },
   "Kladruber": {
@@ -116,7 +116,7 @@ export default {
   "Mongolian Horse": {
     "visible": ["E","e","A","G","CR","D","nd1"],
     "hidden": ["A+","At","f","PA","STY"],
-    "whites": ["LP","PATN1","PATN2","MITF-SW1","WM","TO","RN"],
+    "whites": ["LP","PATN1","PATN2","MITF","WM","TO","RN"],
     "none": ["prl","CH","Z","mu","OLW","rb","Y","SB1","W20"]
   },
   "Mustang": {
@@ -164,13 +164,13 @@ export default {
   "Quarter Horse": {
     "visible": ["E","e","A","CR","prl","D","CH","Z"],
     "hidden": ["A+","At","f"],
-    "whites": ["OLW","MITF-SW1","WM","rb","RN","W10"],
+    "whites": ["OLW","LP","PATN1","MITF","SW2","WM","rb","RN","W10"],
     "none": ["PA","mu","Y","TO","G"]
   },
   "Shetland Pony": {
     "visible": ["E","e","A","G","CR","D","nd1","Z","mu"],
     "hidden": ["A+","At","f","PA","STY"],
-    "whites": ["MITF-SW1","WM","TO","SB1","RN"],
+    "whites": ["MITF","WM","TO","SB1","RN"],
     "none": ["prl","CH","OLW","LP","PATN1","PATN2","Y"]
   },
   "Shire Horse": {
@@ -195,13 +195,13 @@ export default {
   "Trakehner Horse": {
     "visible": ["E","e","A","G","CR"],
     "hidden": ["At","f","STY"],
-    "whites": ["WM","TO","RN","MITF-SW1"],
+    "whites": ["WM","TO","RN","MITF"],
     "none": ["A+","PA","prl","D","nd1","CH","Z","mu","OLW","LP","PATN1","PATN2","rb","SB1","W20"]
   },
   "Welsh Pony": {
     "visible": ["E","e","A","CR","G","D","Z"],
     "hidden": ["At","f","STY"],
-    "whites": ["WM","MITF-SW1","RN","Y","rb"],
+    "whites": ["WM","MITF","RN","Y","rb"],
     "none": ["A+","prl","CH","mu","OLW","LP","PATN1","PATN2","TO","SB1"]
   }
 };

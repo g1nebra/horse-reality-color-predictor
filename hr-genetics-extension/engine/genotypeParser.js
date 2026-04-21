@@ -24,7 +24,7 @@ const DISPLAY_NAME_MAP = {
   'Grey':        'G',
   // Dilutions
   'Creampearl':  'CR',    // two test badges (Cream + Pearl), one result, alleles: CR / prl / n
-  'Dun':         'dun',   // alleles: D / nd1 / nd2 (nd2 shown explicitly in DOM)
+  'Dun':         'D',     // alleles: D / nd1 / nd2 (nd2 shown explicitly in DOM)
   'Champagne':   'CH',    // alleles: CH / ch
   'Silver':      'Z',     // alleles: Z / z
   'Mushroom':    'mu',    // alleles: mu / n

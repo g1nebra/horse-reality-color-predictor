@@ -7,7 +7,7 @@ import { parseGenotype }      from '../../engine/genotypeParser.js';
 import { calculateOffspring } from '../../engine/punnettEngine.js';
 
 // Canonical locus display order for v1
-const LOCUS_ORDER = ['E', 'A', 'CR', 'dun', 'CH', 'Z', 'mu'];
+const LOCUS_ORDER = ['E', 'A', 'CR', 'D', 'CH', 'Z', 'mu'];
 
 // Main export
 /**
@@ -65,12 +65,24 @@ export function renderResults(pairing) {
     }
   }
 
-  // OLW lethal combo warning (stubbed - OLW deferred to v2 whites)
-  // const lethals = outcomes.filter(o => o.genotype.OLW?.join('/') === 'OLW/OLW');
-  // if (lethals.length) { ... }
+  // OLW lethal combo warning
+  const lethalSet = new Set(
+    outcomes
+      .filter(o => o.genotype.OLW?.[0] === 'OLW' && o.genotype.OLW?.[1] === 'OLW')
+      .map(o => o.genotype)
+  );
+  if (lethalSet.size > 0) {
+    const lethalProb = outcomes
+      .filter(o => o.genotype.OLW?.[0] === 'OLW' && o.genotype.OLW?.[1] === 'OLW')
+      .reduce((sum, o) => sum + o.probability, 0);
+    const warning = document.createElement('div');
+    warning.className   = 'results-lethal-warning';
+    warning.textContent = `⚠ ${formatProbability(lethalProb)} chance of OLW/OLW. This is a lethal combination (OLWS). Affected genotypes are marked below.`;
+    panel.appendChild(warning);
+  }
 
   // Table
-  const table = buildTable(outcomes, sharedLoci);
+  const table = buildTable(outcomes, sharedLoci, lethalSet);
   panel.appendChild(table);
 
   return panel;
@@ -83,7 +95,7 @@ export function renderResults(pairing) {
  * @param {string[]} sharedLoci
  * @returns {HTMLTableElement}
  */
-function buildTable(outcomes, sharedLoci) {
+function buildTable(outcomes, sharedLoci, lethalSet = new Set()) {
   // Sort loci in canonical display order, unknown loci appended at end
   const orderedLoci = [
     ...LOCUS_ORDER.filter(l => sharedLoci.includes(l)),
@@ -107,10 +119,18 @@ function buildTable(outcomes, sharedLoci) {
   const tbody = table.createTBody();
   for (const { genotype, probability } of outcomes) {
     const row = tbody.insertRow();
+    const isLethal = lethalSet.has(genotype);
+    if (isLethal) row.className = 'lethal-row';
 
     const tdGeno = row.insertCell();
     tdGeno.className = 'genotype-cell';
     tdGeno.appendChild(buildGenotypeCell(genotype, orderedLoci));
+    if (isLethal) {
+      const tag = document.createElement('span');
+      tag.className   = 'lethal-tag';
+      tag.textContent = 'lethal';
+      tdGeno.appendChild(tag);
+    }
 
     const tdProb = row.insertCell();
     tdProb.className   = 'col-prob';
