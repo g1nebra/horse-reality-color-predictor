@@ -9,10 +9,10 @@ export default {
     "none": ["PA","prl","CH","Z","mu","OLW","LP","PATN1","PATN2","TO","SB1","RN","W20"]
   },
   "Arabian Horse": {
-    "visible": ["E","A","G","CR","D","CH","Z","mu"],
+    "visible": ["E","e","A","G"],
     "hidden": ["A+","At","f","STY"],
-    "whites": ["OLW","LP","PATN1","MITF","SW2","rb","Y","WM","W3","W10","W19","W21"],
-    "none": ["prl","TO","SB1","RN","PATN2","W20"]
+    "whites": ["rb","Y","WM","W3","W19"],
+    "none": ["prl","CR","D","CH","Z","mu","OLW","LP","PATN1","PATN2","MITF","SW2","TO","SB1","RN","W10","W20","W21","nd1","PA"]
   },
   "Brabant Horse": {
     "visible": ["E","e","A","G"],
