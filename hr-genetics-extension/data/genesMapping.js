@@ -65,7 +65,7 @@ export default {
     "fixed": { "A": ["a","a"] }
   },
   "Haflinger": {
-    "visible": ["e","A","G","nd1"],
+    "visible": ["e","A","nd1"],
     "hidden": ["A+","f","PA","STY"],
     "whites": ["WM","rb"],
     "none": ["E","At","G","CR","prl","D","CH","Z","mu","OLW","LP","TO","RN"],
