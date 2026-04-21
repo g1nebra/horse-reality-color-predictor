@@ -69,54 +69,35 @@ function genotypeKey(genotype) {
  * @returns {Array<{ genotype: Object, probability: number }>}
  */
 export function calculateOffspring(dam, sire) {
-  // Find loci present in both parents
   const sharedLoci = Object.keys(dam).filter(locus => locus in sire);
-
   if (sharedLoci.length === 0) return [];
 
-  // Build per-locus outcome arrays: [ [{pair, prob}, ...], [{pair, prob}, ...], ... ]
-  const locusOutcomes = sharedLoci.map(locus =>
-    crossLocus(dam[locus], sire[locus])
-  );
+  // Fold locus-by-locus, deduplicating after each step.
+  // Keeps the working set at ≤ 3^n distinct outcomes instead of the 4^n
+  // raw Punnett combinations that the cartesian-first approach materialises.
+  let partial = new Map([['', { genotype: {}, probability: 1 }]]);
 
-  // Cartesian product across all loci to get every possible full genotype
-  const combined = cartesian(locusOutcomes);
+  for (const locus of sharedLoci) {
+    const pairs = crossLocus(dam[locus], sire[locus]);
+    const next  = new Map();
 
-  // Build genotype objects and accumulate probabilities for identical outcomes
-  const accumulator = new Map();
-
-  for (const combination of combined) {
-    // combination is an array of { pair, prob }, one per locus
-    const genotype = {};
-    let prob = 1;
-
-    for (let i = 0; i < sharedLoci.length; i++) {
-      genotype[sharedLoci[i]] = combination[i].pair;
-      prob *= combination[i].prob;
+    for (const { genotype, probability } of partial.values()) {
+      for (const { pair, prob } of pairs) {
+        const newGenotype = { ...genotype, [locus]: pair };
+        const key         = genotypeKey(newGenotype);
+        const newProb     = probability * prob;
+        if (next.has(key)) {
+          next.get(key).probability += newProb;
+        } else {
+          next.set(key, { genotype: newGenotype, probability: newProb });
+        }
+      }
     }
 
-    const key = genotypeKey(genotype);
-    if (accumulator.has(key)) {
-      accumulator.get(key).probability += prob;
-    } else {
-      accumulator.set(key, { genotype, probability: prob });
-    }
+    partial = next;
   }
 
-  // Return sorted by probability descending
-  return [...accumulator.values()].sort((a, b) => b.probability - a.probability);
+  return [...partial.values()].sort((a, b) => b.probability - a.probability);
 }
 
-// Cartesian product utility
-// Turns [[a,b],[c,d]] into [[a,c],[a,d],[b,c],[b,d]]
-
-/**
- * @param {Array<Array<any>>} arrays
- * @returns {Array<Array<any>>}
- */
-function cartesian(arrays) {
-  return arrays.reduce(
-    (acc, curr) => acc.flatMap(combo => curr.map(item => [...combo, item])),
-    [[]]
-  );
-}
+// (cartesian helper removed calculateOffspring folds locus-by-locus now)
