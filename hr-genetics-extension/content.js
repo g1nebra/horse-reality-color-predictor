@@ -191,6 +191,7 @@ function pickHorse(role) {
   // Watch for the topbar button and genetics rows, both injected dynamically
   let badgeInjected  = false;
   let geneticsReady  = false;
+  let observer       = null;
 
   function check() {
     if (!badgeInjected && document.getElementById(HR_BTN_ID)) {
@@ -205,12 +206,14 @@ function pickHorse(role) {
       }
     }
     if (badgeInjected && geneticsReady) {
-      observer.disconnect();
+      observer?.disconnect();
     }
   }
 
   check();
-  const observer = new MutationObserver(check);
-  observer.observe(document.body, { childList: true, subtree: true });
-  setTimeout(() => observer.disconnect(), 60_000);
+  if (!badgeInjected || !geneticsReady) {
+    observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => observer?.disconnect(), 60_000);
+  }
 })();

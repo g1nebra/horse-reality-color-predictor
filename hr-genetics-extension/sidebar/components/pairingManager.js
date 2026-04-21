@@ -1,5 +1,5 @@
 // Pure data module, no DOM, no rendering.
-// All pairing CRUD + chrome.storage.sync persistence.
+// All pairing CRUD + chrome.storage.local persistence.
 // Pairing shape:
 //   { id: string, name: string, dam: Horse|null, sire: Horse|null }
 // Horse shape:
@@ -22,28 +22,11 @@ export function loadPairings() {
 }
 
 /**
- * Strip large photo layer arrays before persisting, keeps only photoUrl
- * (single URL) to stay well within chrome.storage.local limits.
- *
- * @param {Object|null} horse
- * @returns {Object|null}
- */
-function sanitizeHorse(horse) {
-  if (!horse) return null;
-  const { photoLayers, ...rest } = horse;
-  return rest;
-}
-
-/**
  * @param {Array} pairings
  * @returns {Promise<void>}
  */
 export function savePairings(pairings) {
-  const sanitized = pairings.map(p => ({
-    ...p,
-    dam:  sanitizeHorse(p.dam),
-    sire: sanitizeHorse(p.sire),
-  }));
+  const sanitized = pairings;
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [STORAGE_KEY]: sanitized }, () => {
       if (chrome.runtime.lastError) {

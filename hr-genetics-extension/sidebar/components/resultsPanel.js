@@ -49,6 +49,22 @@ export function renderResults(pairing) {
   summary.textContent = `${outcomes.length} possible genotype${outcomes.length === 1 ? '' : 's'} · loci: ${sharedLoci.join(', ')}`;
   panel.appendChild(summary);
 
+  // Partial test disclaimer
+  if (damResult.partiallyTested || sireResult.partiallyTested) {
+    const damOnly  = Object.keys(damGeno).filter(l => !(l in sireGeno));
+    const sireOnly = Object.keys(sireGeno).filter(l => !(l in damGeno));
+    const excluded = [
+      ...damOnly.map(l  => `${l} (sire untested)`),
+      ...sireOnly.map(l => `${l} (dam untested)`),
+    ];
+    if (excluded.length > 0) {
+      const note = document.createElement('div');
+      note.className   = 'results-partial-note';
+      note.textContent = `⚠ Partial results. Excluded loci: ${excluded.join(', ')}`;
+      panel.appendChild(note);
+    }
+  }
+
   // OLW lethal combo warning (stubbed - OLW deferred to v2 whites)
   // const lethals = outcomes.filter(o => o.genotype.OLW?.join('/') === 'OLW/OLW');
   // if (lethals.length) { ... }

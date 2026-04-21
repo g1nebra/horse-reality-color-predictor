@@ -111,7 +111,7 @@ export function parseGenotype(rows, breed, hiddenGeneToggles = {}) {
   // The DOM exposes a single "KIT" row that bundles all KIT-family white patterns
   // (Tobiano, Roan, Sabino, etc.). genesMapping stores them as individual keys.
   // Allow KIT through if the breed has any KIT-family gene in its mapping.
-  const KIT_FAMILY = new Set(['TO', 'RN', 'SB1', 'WM', 'Y', 'rb', 'W3', 'W19', 'W20']);
+  const KIT_FAMILY = new Set(['TO', 'RN', 'SB1', 'WM', 'Y', 'rb', 'W3', 'W8', 'W10', 'W16', 'W19', 'W20', 'W21']);
   const breedAllowsKit = breedData
     ? [...breedVisible, ...breedWhites].some(l => KIT_FAMILY.has(l))
     : true;

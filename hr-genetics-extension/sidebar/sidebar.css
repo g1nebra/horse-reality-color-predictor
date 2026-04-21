@@ -524,6 +524,16 @@ button {
 
 .results-summary { font-size: 11px; color: var(--p500); }
 
+.results-partial-note {
+  font-size: 11px;
+  color: #a07000;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-top: 6px;
+}
+
 .results-table {
   width: 100%;
   border-collapse: collapse;
