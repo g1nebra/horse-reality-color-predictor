@@ -11,7 +11,8 @@
 //         tested: { [locusKey]: [boolean, boolean] }
 
 
-import genesMapping from '../data/genesMapping.js';
+import genesMapping    from '../data/genesMapping.js';
+import hiddenModifiers from '../data/hiddenModifiers.js';
 
 // Display name → locus key
 // genetic_name values confirmed from the DOM + planning doc
@@ -141,13 +142,25 @@ export function parseGenotype(rows, breed, hiddenGeneToggles = {}) {
     }
   }
 
-  // 3. Merge hidden gene toggles (user-resolved ambiguous alleles)
-  //    Toggles only affect alleles that tested as "A" (Agouti ambiguity)
-  //    or other hidden-panel selections. They do not introduce new loci.
+  // 3. Apply defaults for hidden modifier loci (f, STY, PA) the breed has
+  //    listed under `hidden`. The user can override via the hidden gene panel;
+  //    loci already in genotype (e.g. fixed stubs or breed-visible) are left alone.
+  const breedHidden = new Set(breedData?.hidden ?? []);
+  for (const [locusKey, config] of Object.entries(hiddenModifiers)) {
+    if (!breedHidden.has(locusKey)) continue;
+    if (locusKey in genotype) continue;
+    genotype[locusKey] = [...config.default];
+    tested[locusKey]   = [true, true];
+  }
+
+  // 4. Merge hidden gene toggles from the panel.
+  //    Toggles either resolve ambiguous alleles on an existing locus
+  //    (Agouti slot → A/A+/At) or override a hidden modifier locus the breed
+  //    has defaulted above. Fixed loci are not toggleable by the panel, so
+  //    they will never appear in hiddenGeneToggles.
   for (const [locusKey, alleles] of Object.entries(hiddenGeneToggles)) {
-    if (locusKey in genotype) {
-      genotype[locusKey] = alleles;
-    }
+    genotype[locusKey] = alleles;
+    if (!(locusKey in tested)) tested[locusKey] = [true, true];
   }
 
   // 4. Compute test coverage flags

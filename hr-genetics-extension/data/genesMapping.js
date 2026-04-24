@@ -69,7 +69,7 @@ export default {
     "hidden": ["A+","f","PA","STY"],
     "whites": ["WM","rb"],
     "none": ["E","At","G","CR","prl","D","CH","Z","mu","OLW","LP","TO","RN"],
-    "fixed": { "E": ["e","e"] }
+    "fixed": { "E": ["e","e"], "f": ["f","f"] }
   },
   "Icelandic Horse": {
     "visible": ["E","e","A","G","D","nd1","Z","CR"],
@@ -135,7 +135,8 @@ export default {
     "visible": ["E","e","A"],
     "hidden": ["At","f","STY"],
     "whites": ["LP","PATN1","PATN2","WM","Y","TO","RN"],
-    "none": ["A+","PA","CR","prl","D","nd1","CH","Z","mu","OLW","rb","G"]
+    "none": ["A+","PA","CR","prl","D","nd1","CH","Z","mu","OLW","rb","G"],
+    "fixed": { "f": ["f","f"] }
   },
   "Norman Cob": {
     "visible": ["E","e","A","G"],

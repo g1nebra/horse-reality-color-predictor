@@ -6,8 +6,8 @@
 import { parseGenotype }      from '../../engine/genotypeParser.js';
 import { calculateOffspring } from '../../engine/punnettEngine.js';
 
-// Canonical locus display order for v1
-const LOCUS_ORDER = ['E', 'A', 'CR', 'D', 'CH', 'Z', 'mu'];
+// Canonical locus display order. Base colour → dilutes → modifiers → grey.
+const LOCUS_ORDER = ['E', 'A', 'CR', 'D', 'CH', 'Z', 'mu', 'f', 'STY', 'PA', 'G'];
 
 // Main export
 /**
