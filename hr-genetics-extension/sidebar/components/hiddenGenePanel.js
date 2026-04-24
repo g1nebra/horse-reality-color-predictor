@@ -10,12 +10,24 @@
  //   onUpdate(newToggles), called when the user changes a dropdown.
  //   newToggles shape: { A: ['A+', 'a'] }  (locusKey → resolved pair)
 
+import genesMapping from '../../data/genesMapping.js';
 
-// Alleles that are visually ambiguous in the DOM and need user disambiguation.
-// Each entry maps a raw DOM allele to the choices the user can pick from.
+// All possible ambiguous alleles per locus, filtered per breed before rendering.
+// Each key is a raw DOM allele; value is the full set of what it could mean.
 const AMBIGUOUS_ALLELES = {
   A: ['A', 'A+', 'At'],  // Agouti: raw "A" could be Bay, Wild Bay, or Seal Brown
 };
+
+// Return only the choices that are valid for the breed.
+// Always keeps the base allele; adds hidden-gene variants only if in breed.hidden.
+function choicesForBreed(rawAllele, breed) {
+  const all = AMBIGUOUS_ALLELES[rawAllele];
+  if (!all) return [rawAllele];
+  const breedData = genesMapping[breed];
+  if (!breedData) return all; // unknown breed, show all options
+  const breedHidden = new Set(breedData.hidden ?? []);
+  return all.filter(choice => choice === rawAllele || breedHidden.has(choice));
+}
 
 // Main export
 
@@ -46,7 +58,7 @@ export function renderHiddenGenePanel(horse, onUpdate) {
 
     for (const slotIndex of slots) {
       const rawAllele   = horse.genotype[locusKey]?.[slotIndex] ?? '?';
-      const choices     = AMBIGUOUS_ALLELES[rawAllele] ?? [rawAllele];
+      const choices     = choicesForBreed(rawAllele, horse.breed);
       const currentVal  = resolvedPair[slotIndex];
 
       const slotWrapper = document.createElement('div');

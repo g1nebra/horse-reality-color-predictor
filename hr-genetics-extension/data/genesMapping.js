@@ -64,7 +64,7 @@ export default {
     "none": ["A","A+","At","PA","CR","prl","D","nd1","CH","Z","mu","OLW","LP","rb","Y","TO","SB1","RN","W20","G"],
     "fixed": { "A": ["a","a"] }
   },
-  "Haflinger": {
+  "Haflinger Horse": {
     "visible": ["e","A","nd1"],
     "hidden": ["A+","f","PA","STY"],
     "whites": ["WM","rb"],
