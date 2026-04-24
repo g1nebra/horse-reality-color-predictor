@@ -57,7 +57,7 @@ export default {
     "whites": [],
     "none": ["A+","At","f","STY","prl","CH","Z","mu","OLW","LP","rb","Y","TO","SB1","RN","W20","G"]
   },
-  "Friesian": {
+  "Friesian Horse": {
     "visible": ["E","e"],
     "hidden": ["f","STY"],
     "whites": ["WM"],
