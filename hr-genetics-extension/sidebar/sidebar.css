@@ -466,6 +466,71 @@ button {
 
 #hidden-gene-section:empty { display: none; }
 
+.hidden-gene-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--p200);
+  margin-bottom: 4px;
+}
+
+.hidden-gene-header-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--p700);
+}
+
+.hidden-gene-header-sub {
+  font-size: 10px;
+  color: var(--p500);
+  line-height: 1.4;
+}
+
+.hidden-gene-help {
+  margin-top: 2px;
+}
+
+.hidden-gene-help summary {
+  font-size: 10px;
+  color: var(--p600);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.hidden-gene-help summary::-webkit-details-marker { display: none; }
+
+.hidden-gene-help summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform 0.12s;
+  font-size: 9px;
+}
+
+.hidden-gene-help[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.hidden-gene-help summary:hover { color: var(--p800); }
+
+.hidden-gene-help-body {
+  font-size: 10px;
+  color: var(--p600);
+  line-height: 1.5;
+  padding: 4px 6px 2px;
+  margin-top: 2px;
+  background: var(--p100);
+  border-radius: 3px;
+}
+
+.hidden-gene-help-body p { margin: 0 0 4px 0; }
+.hidden-gene-help-body p:last-child { margin-bottom: 0; }
+.hidden-gene-help-body ul { margin: 0 0 4px 16px; padding: 0; }
+.hidden-gene-help-body li { margin-bottom: 2px; }
+
 .hidden-gene-group { display: flex; flex-direction: column; gap: 4px; }
 .hidden-gene-group:empty { display: none; }
 

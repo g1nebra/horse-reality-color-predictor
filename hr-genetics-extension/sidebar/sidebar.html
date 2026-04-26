@@ -41,8 +41,27 @@
         <span id="results-pairing-name"></span>
       </header>
 
-      <!-- Hidden gene toggles (A+/At ambiguity) for dam and sire -->
+      <!-- Hidden gene toggles (A+/At ambiguity, hidden modifiers) for dam and sire -->
       <div id="hidden-gene-section">
+        <div class="hidden-gene-header">
+          <div class="hidden-gene-header-title">Hidden genes</div>
+          <div class="hidden-gene-header-sub">Not shown in the genetics table. Set manually if you know the horse carries them.</div>
+          <details class="hidden-gene-help">
+            <summary>How do I know if my horse has these?</summary>
+            <div class="hidden-gene-help-body">
+              <p>Hidden genes don't appear in the in-game genetics table. To find out if your horse carries them:</p>
+              <ul>
+                <li>Check the horse's lineage and the parents' profile notes</li>
+                <li>Browse color galleries and breed guides</li>
+                <li>Ask other breeders who may have tracked these in their lines</li>
+              </ul>
+              <p>Many breeders flag hidden genes in the horse's notes, name, or tagline so future buyers, and anyone covering one of their mares with the stud, know what genes might be passed on.</p>
+              <p>Some hidden genes only show visually when both copies are present (homozygous). Heterozygous horses are silent carriers, they look unaffected, but every offspring of a homozygous parent inherits at least one copy, and offspring of two carriers have a 25% chance of being homozygous themselves.</p>
+              <p>Genes that need to be homozygous to show: <strong>Flaxen (f/f)</strong>, <strong>Sabino hidden (Y/Y)</strong>, <strong>Rabicano (rb/rb)</strong>, and <strong>Sooty on red-based coats</strong> (STY/STY).</p>
+              <p><strong>If you're not sure, leave it as the default.</strong> Leaving it absent keeps the calculation conservative.</p>
+            </div>
+          </details>
+        </div>
         <div id="hidden-genes-dam"  class="hidden-gene-group"></div>
         <div id="hidden-genes-sire" class="hidden-gene-group"></div>
       </div>
