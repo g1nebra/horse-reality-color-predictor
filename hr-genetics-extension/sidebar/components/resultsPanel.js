@@ -51,11 +51,16 @@ export function renderResults(pairing) {
 
   // Partial test disclaimer
   if (damResult.partiallyTested || sireResult.partiallyTested) {
-    const damOnly  = Object.keys(damGeno).filter(l => !(l in sireGeno));
-    const sireOnly = Object.keys(sireGeno).filter(l => !(l in damGeno));
+    const damUntested  = untestedRowNames(pairing.dam.rows);
+    const sireUntested = untestedRowNames(pairing.sire.rows);
+    const bothUntested = damUntested.filter(n => sireUntested.includes(n));
+    const damOnlyUntested  = damUntested.filter(n => !sireUntested.includes(n));
+    const sireOnlyUntested = sireUntested.filter(n => !damUntested.includes(n));
+
     const excluded = [
-      ...damOnly.map(l  => `${l} (sire untested)`),
-      ...sireOnly.map(l => `${l} (dam untested)`),
+      ...damOnlyUntested.map(n  => `${n} (dam untested)`),
+      ...sireOnlyUntested.map(n => `${n} (sire untested)`),
+      ...bothUntested.map(n     => `${n} (both untested)`),
     ];
     if (excluded.length > 0) {
       const note = document.createElement('div');
@@ -205,4 +210,17 @@ function emptyMsg(text) {
   el.className   = 'results-empty';
   el.textContent = text;
   return el;
+}
+
+// Returns display names of rows where the result was "? / ?".
+// Uses the DOM display name (e.g., "KIT", "Champagne") so the disclaimer matches
+// what the user saw in-game rather than internal locus keys.
+function untestedRowNames(rows) {
+  if (!rows) return [];
+  return rows
+    .filter(r => {
+      const parts = r.result.trim().split(' / ');
+      return parts[0] === '?' && parts[1] === '?';
+    })
+    .map(r => r.name.trim());
 }

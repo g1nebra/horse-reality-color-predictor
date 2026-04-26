@@ -35,13 +35,16 @@ function choicesForBreed(rawAllele, breed) {
 }
 
 // Return toggleable modifier loci for this breed, filtering out any fixed at breed level.
+// Some hidden modifiers are classified under the breed's `whites` list (reference HTML
+// keeps HR-custom hidden whites in that column); we accept either source.
 function modifierLociForBreed(breed) {
   const breedData = genesMapping[breed];
   if (!breedData) return [];
   const breedHidden = new Set(breedData.hidden ?? []);
+  const breedWhites = new Set(breedData.whites ?? []);
   const fixedLoci   = new Set(Object.keys(breedData.fixed ?? {}));
   return Object.entries(hiddenModifiers)
-    .filter(([key]) => breedHidden.has(key) && !fixedLoci.has(key))
+    .filter(([key]) => (breedHidden.has(key) || breedWhites.has(key)) && !fixedLoci.has(key))
     .map(([key, config]) => ({ key, ...config }));
 }
 

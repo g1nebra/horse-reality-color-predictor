@@ -27,4 +27,28 @@ export default {
     options: [['n', 'n'], ['PA', 'n'], ['PA', 'PA']],
     default: ['n', 'n'],
   },
+  // HR-custom hidden white-pattern modifiers (planning 2.6).
+  // Listed under `whites` in genesMapping (matching the reference HTML's column),
+  // but never appear in DOM. Panel surfaces them as tri-state toggles whenever
+  // the breed has them in `hidden` OR `whites`.
+  Y: {
+    label:   'Sabino hidden',
+    options: [['n', 'n'], ['Y', 'n'], ['Y', 'Y']],
+    default: ['n', 'n'],
+  },
+  rb: {
+    label:   'Rabicano',
+    options: [['n', 'n'], ['rb', 'n'], ['rb', 'rb']],
+    default: ['n', 'n'],
+  },
+  WM: {
+    label:   'White Markings',
+    options: [['n', 'n'], ['WM', 'n'], ['WM', 'WM']],
+    default: ['n', 'n'],
+  },
+  PATN2: {
+    label:   'PATN2',
+    options: [['n', 'n'], ['PATN2', 'n'], ['PATN2', 'PATN2']],
+    default: ['n', 'n'],
+  },
 };

@@ -142,12 +142,13 @@ export function parseGenotype(rows, breed, hiddenGeneToggles = {}) {
     }
   }
 
-  // 3. Apply defaults for hidden modifier loci (f, STY, PA) the breed has
-  //    listed under `hidden`. The user can override via the hidden gene panel;
-  //    loci already in genotype (e.g. fixed stubs or breed-visible) are left alone.
+  // 3. Apply defaults for hidden modifier loci the breed lists under `hidden`
+  //    (color modifiers: f, STY, PA) or `whites` (HR-custom hidden whites: Y, rb,
+  //    WM, PATN2). The user can override via the hidden gene panel; loci already
+  //    in genotype (e.g. fixed stubs or breed-visible) are left alone.
   const breedHidden = new Set(breedData?.hidden ?? []);
   for (const [locusKey, config] of Object.entries(hiddenModifiers)) {
-    if (!breedHidden.has(locusKey)) continue;
+    if (!breedHidden.has(locusKey) && !breedWhites.has(locusKey)) continue;
     if (locusKey in genotype) continue;
     genotype[locusKey] = [...config.default];
     tested[locusKey]   = [true, true];

@@ -83,13 +83,13 @@ export default {
     "whites": ["WM","TO","SB1","RN","LP","MITF"],
     "none": ["A+","CH","mu","OLW","rb","Y"]
   },
-  "Kathiawari": {
+  "Kathiawari Horse": {
     "visible": ["E","e","A","G","CR","D","nd1"],
     "hidden": ["A+","At","f","STY"],
     "whites": ["MITF","WM","Y"],
     "none": []
   },
-  "Kladruber": {
+  "Kladruber Horse": {
     "visible": ["E","e","A","G"],
     "hidden": ["At","f","STY"],
     "whites": ["WM","rb"],
@@ -101,9 +101,9 @@ export default {
     "whites": ["LP","PATN1","PATN2","WM","RN"],
     "none": ["PA","prl","CH","mu","OLW","rb","Y","TO","SB1","G"]
   },
-  "Lipizzaner": {
+  "Lipizzaner Horse": {
     "visible": ["E","e","A","G","CR","nd1"],
-    "hidden": ["f","STY"],
+    "hidden": ["At","f","STY"],
     "whites": ["WM","Y","RN","W20"],
     "none": ["A+","PA","D","CH","Z","mu","sno","OLW","LP","PATN1","PATN2","rb","TO","SB1"]
   },
@@ -119,7 +119,7 @@ export default {
     "whites": ["LP","PATN1","PATN2","MITF","WM","TO","RN"],
     "none": ["prl","CH","Z","mu","OLW","rb","Y","SB1","W20"]
   },
-  "Mustang": {
+  "Mustang Horse": {
     "visible": ["E","e","A","CR","prl","D","CH","Z"],
     "hidden": ["A+","At","f","PA","STY"],
     "whites": ["OLW","WM","TO","RN"],
@@ -193,7 +193,7 @@ export default {
     "whites": ["OLW","WM","rb","RN"],
     "none": ["PA","prl","D","CH","Z","mu","LP","PATN1","PATN2","Y","TO","SB1"]
   },
-  "Trakehner Horse": {
+  "Trakehner": {
     "visible": ["E","e","A","G","CR"],
     "hidden": ["At","f","STY"],
     "whites": ["WM","TO","RN","MITF"],
