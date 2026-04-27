@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HR Genetics by claymore",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Horse Reality colour genetics predictor. Calculate offspring colour outcomes instantly from any horse profile.",
 
   "permissions": ["activeTab", "storage"],

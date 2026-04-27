@@ -5,6 +5,7 @@
 
 import { parseGenotype }      from '../../engine/genotypeParser.js';
 import { calculateOffspring } from '../../engine/punnettEngine.js';
+import { resolvePhenotype }   from '../../engine/phenotypeResolver.js';
 
 // Canonical locus display order. Base colour → dilutes → modifiers → grey.
 const LOCUS_ORDER = ['E', 'A', 'CR', 'D', 'CH', 'Z', 'mu', 'f', 'STY', 'PA', 'G'];
@@ -70,24 +71,27 @@ export function renderResults(pairing) {
     }
   }
 
-  // OLW lethal combo warning
-  const lethalSet = new Set(
-    outcomes
-      .filter(o => o.genotype.OLW?.[0] === 'OLW' && o.genotype.OLW?.[1] === 'OLW')
-      .map(o => o.genotype)
-  );
-  if (lethalSet.size > 0) {
-    const lethalProb = outcomes
-      .filter(o => o.genotype.OLW?.[0] === 'OLW' && o.genotype.OLW?.[1] === 'OLW')
-      .reduce((sum, o) => sum + o.probability, 0);
+  // Resolve the phenotype once per outcome and reuse for the lethal warning,
+  // the row tagging, and the Phenotype column.
+  const breed = pairing.dam.breed; // pairings are same-breed, either works
+  const phenotypeByGenotype = new Map();
+  for (const o of outcomes) {
+    phenotypeByGenotype.set(o.genotype, resolvePhenotype(o.genotype, breed));
+  }
+
+  // Lethal warning, sums every lethal outcome (OLW/OLW + non-W20 Wx homozygous).
+  const lethalOutcomes = outcomes.filter(o => phenotypeByGenotype.get(o.genotype).lethal);
+  const lethalSet = new Set(lethalOutcomes.map(o => o.genotype));
+  if (lethalOutcomes.length > 0) {
+    const lethalProb = lethalOutcomes.reduce((sum, o) => sum + o.probability, 0);
     const warning = document.createElement('div');
     warning.className   = 'results-lethal-warning';
-    warning.textContent = `⚠ ${formatProbability(lethalProb)} chance of OLW/OLW. This is a lethal combination (OLWS). Affected genotypes are marked below.`;
+    warning.textContent = `⚠ ${formatProbability(lethalProb)} chance of a lethal combination. Affected genotypes are marked below.`;
     panel.appendChild(warning);
   }
 
   // Table
-  const table = buildTable(outcomes, sharedLoci, lethalSet);
+  const table = buildTable(outcomes, sharedLoci, lethalSet, phenotypeByGenotype);
   panel.appendChild(table);
 
   return panel;
@@ -100,7 +104,7 @@ export function renderResults(pairing) {
  * @param {string[]} sharedLoci
  * @returns {HTMLTableElement}
  */
-function buildTable(outcomes, sharedLoci, lethalSet = new Set()) {
+function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGenotype = new Map()) {
   // Sort loci in canonical display order, unknown loci appended at end
   const orderedLoci = [
     ...LOCUS_ORDER.filter(l => sharedLoci.includes(l)),
@@ -115,10 +119,12 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set()) {
   const headRow = thead.insertRow();
   const thGeno = document.createElement('th');
   thGeno.textContent = 'Genotype';
+  const thPheno = document.createElement('th');
+  thPheno.textContent = 'Phenotype';
   const thProb = document.createElement('th');
   thProb.className   = 'col-prob';
   thProb.textContent = '%';
-  headRow.append(thGeno, thProb);
+  headRow.append(thGeno, thPheno, thProb);
 
   // Body
   const tbody = table.createTBody();
@@ -137,12 +143,56 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set()) {
       tdGeno.appendChild(tag);
     }
 
+    const tdPheno = row.insertCell();
+    tdPheno.className = 'phenotype-cell';
+    tdPheno.appendChild(buildPhenotypeCell(phenotypeByGenotype.get(genotype)));
+
     const tdProb = row.insertCell();
     tdProb.className   = 'col-prob';
     tdProb.textContent = formatProbability(probability);
   }
 
   return table;
+}
+
+// Phenotype cell builder
+
+/**
+ * Renders the resolved coat name, white-pattern overlays, and an optional `*`
+ * marker linking to notes via a tooltip.
+ *
+ * @param {{ base: string, patterns: string[], lethal: boolean, notes: string[] }} phenotype
+ * @returns {DocumentFragment}
+ */
+function buildPhenotypeCell(phenotype) {
+  const frag = document.createDocumentFragment();
+  const { base, patterns = [], notes = [] } = phenotype ?? {};
+
+  const baseSpan = document.createElement('span');
+  baseSpan.className   = base === 'Unknown' ? 'phenotype-base phenotype-base-unknown' : 'phenotype-base';
+  baseSpan.textContent = base ?? '?';
+  frag.appendChild(baseSpan);
+
+  if (patterns.length > 0) {
+    const sep = document.createElement('span');
+    sep.className   = 'phenotype-sep';
+    sep.textContent = ' · ';
+    frag.appendChild(sep);
+
+    const patternsSpan = document.createElement('span');
+    patternsSpan.className   = 'phenotype-patterns';
+    patternsSpan.textContent = patterns.join(' · ');
+    frag.appendChild(patternsSpan);
+  }
+
+  if (notes.length > 0) {
+    const noteEl = document.createElement('div');
+    noteEl.className   = 'phenotype-note';
+    noteEl.textContent = notes.join(' · ');
+    frag.appendChild(noteEl);
+  }
+
+  return frag;
 }
 
 // Genotype cell builder

@@ -216,7 +216,6 @@ These HR-specific mechanics differ from real-world genetics and affect how the e
 | **Grey (G) at adulthood** | Grey overrides all other colour expression visually at adulthood. In-game, the adult grey phenotype is **randomly chosen** from that breed's grey pool (dapple grey, steel grey, fleabitten, white, etc.). Foals are born hyperpigmented with darker coats and may show grey goggles around the eyes. |
 | **Roan (RN) age gate** | Roan does not show on foals. The roan coat only appears when the horse **turns 3 years old** in-game. |
 | **Sooty (STY) dominance rules** | *(v2, defer to Phase 7)* Dominant on bay-based coats (single copy shows); recessive on chestnut in most breeds (two copies needed). **Exceptions:** Lusitano, Trakehner, Oldenburg, and Haflinger treat STY as incomplete dominant on chestnut. Black-based horses never express sooty. Masked on foals, under Grey, on double dilutes, and under Dun (except Kathiawari, the only breed with sooty dun). |
-| **Sooty hides Pangaré (Haflinger)** | Unique to Haflingers: sooty hides pangaré instead of combining with it. No sooty pangaré coat exists. |
 | **W20/W20 viability** | All homozygous white spotting combinations are embryonic lethal except W20/W20. |
 
 ---
@@ -237,7 +236,7 @@ Data from `hr_genetics_reference_claymore_v1.html`. Categories: **visible** (tes
 | 8 | Finnhorse | incomplete | Rabicano recessive hidden (two copies needed). Roan from age 3. |
 | 9 | Fjord Horse | incomplete | Rich dun traits standard. Pangaré visible and standard. No hidden genes. |
 | 10 | Friesian | complete | **Agouti fixed (a/a)**, effectively black. Bay/Wild Bay/Seal Brown cannot appear. Chestnut technically possible but extremely rare. |
-| 11 | Haflinger | complete | **Extension fixed (e/e)**, all chestnut. Flaxen hidden but fixed. Nd1 gives dorsal stripe without dun dilution. STY incomplete dominant on chestnut (STY/n ≠ STY/STY visually). Sooty hides pangaré (unique). |
+| 11 | Haflinger | complete | **Extension fixed (e/e)**, all chestnut. Flaxen hidden but fixed. Nd1 gives dorsal stripe without dun dilution. STY incomplete dominant on chestnut (STY/n ≠ STY/STY visually). |
 | 12 | Icelandic Horse | complete | W8 and W21 are Icelandic-specific. One of the most genetically diverse breeds. Roan from age 3. |
 | 13 | Irish Cob Horse | incomplete | LP present (unusual for cob). Cream+Pearl share locus. SB1/SB1 ≈ nearly white. Snowdrop (sno) suspected. |
 | 14 | Kathiawari | complete | One of few breeds with no 'no evidence' column. **Only breed where sooty expresses on dun coats.** |

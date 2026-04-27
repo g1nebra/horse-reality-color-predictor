@@ -165,22 +165,22 @@ Patterns are listed separately from the base colour, in any order. They overlay 
 ### 12. Appaloosa pattern composition
 
 Leopard (LP) interacts with PATN1 and PATN2 to produce the visible Appaloosa pattern. LP must be present for any PATN modifier to have a visible effect.
-The dosage of LP combined with pattern modifiers determines the expressed phenotype. LP also produces striped hooves and visible white sclera. PATN2 is untestable and may therefore be the reason why a horse that tests negative for PATN1, still shows a spotted blanket or snowcap blanket pattern.
+The dosage of LP combined with pattern modifiers determines the expressed phenotype. LP also produces striped hooves, mottled skin and visible white sclera. PATN2 is untestable and may therefore be the reason why a horse that tests negative for PATN1, still shows a spotted blanket or snowcap blanket pattern.
 
 - No LP (`lp/lp`) → No Appaloosa pattern, even if PATN modifiers are present.
 
 - Without PATN modifiers:
-  - `LP/lp` or `LP/LP` → Varnish Roan (roan-like progressive pattern, also appears at age 3 in HR)
+  - `LP/lp` or `LP/LP` → Varnish (roan-like progressive pattern, also appears at age 3 in HR)
 
 - With PATN1:
-  - `LP/lp` + `PATN1/patn1` → Near Leopard
+  - `LP/lp` + `PATN1/patn1` → Blanket
   - `LP/lp` + `PATN1/PATN1` → Leopard
-  - `LP/LP` + `PATN1/patn1` → Near Few-Spot
+  - `LP/LP` + `PATN1/patn1` → Snowcap
   - `LP/LP` + `PATN1/PATN1` → Few-Spot Leopard
 
 - With PATN2 (no PATN1):
-  - `LP/lp` + PATN2 → Spotted Snowcap Blanket
-  - `LP/LP` + PATN2 → White Snowcap Blanket
+  - `LP/lp` + PATN2 → Blanket
+  - `LP/LP` + PATN2 → Snowcap
 
 
 ---

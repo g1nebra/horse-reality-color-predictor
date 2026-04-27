@@ -671,6 +671,42 @@ button {
   font-weight: 500;
 }
 
+.phenotype-cell {
+  font-size: 11px;
+  color: var(--p900);
+  line-height: 1.4;
+  font-weight: 500;
+  padding-left: 8px;
+}
+
+.phenotype-base { white-space: normal; }
+
+.phenotype-base-unknown {
+  font-style: italic;
+  color: var(--p500);
+  font-weight: 400;
+}
+
+.phenotype-sep {
+  color: #999;
+  font-weight: 400;
+}
+
+.phenotype-patterns {
+  color: var(--p600);
+  font-weight: 400;
+}
+
+.phenotype-note {
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--p500);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: normal;
+}
+
 .col-prob {
   text-align: right;
   font-weight: 700;
