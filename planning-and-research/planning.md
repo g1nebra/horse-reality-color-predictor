@@ -1,4 +1,4 @@
-# HR Genetics, Chrome Extension
+# HR Color Predictor, Chrome Extension
 ## Planning Document v1.0 | April 2026
 
 > **Source of truth for all genetics data: `hr_genetics_reference_claymore_v1.html`**  
@@ -21,11 +21,11 @@
 
 ## 1. Project Overview
 
-### 1.1 What is HR Genetics?
+### 1.1 What is HR Color Predictor?
 
-HR Genetics is a Chrome extension for the browser game Horse Reality. It reads the genotype data already visible on a horse's profile page, lets the player designate a dam and a sire, and instantly calculates every possible colour outcome for their offspring, showing genotype, phenotype, colour name, and probability percentage for each result.
+HR Color Predictor is a Chrome extension for the browser game Horse Reality. It reads the genotype data already visible on a horse's profile page, lets the player designate a dam and a sire, and instantly calculates every possible colour outcome for their offspring, showing genotype, phenotype, colour name, and probability percentage for each result.
 
-The goal is to eliminate manual cross-referencing and guesswork. Players who want to breed for a specific coat colour currently have to calculate Punnett squares by hand or use external spreadsheets. HR Genetics makes that instant, in-browser, and breed-aware.
+The goal is to eliminate manual cross-referencing and guesswork. Players who want to breed for a specific coat colour currently have to calculate Punnett squares by hand or use external spreadsheets. HR Color Predictor makes that instant, in-browser, and breed-aware.
 
 
 ### 1.2 Scope
