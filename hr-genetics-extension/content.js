@@ -162,12 +162,16 @@ function pickHorse(role) {
       .filter(l => l.url && l.height != null)
       .map(l => ({ ...l, height: parseFloat(l.height), left: parseFloat(l.left), up: parseFloat(l.up) }));
 
-    // All layers for the same horse share identical height/left/up values.
-    // A foal (or second horse) is at a different position, keep only layers
-    // matching the first layer's coordinates.
+    // When a foal under 6 months shares the page with its dam, both horses'
+    // layers come back in `imageLayers`. Each horse occupies one distinct
+    // height/left/up triple, and foals always render smaller (lower `height`).
+    // Pick the size matching this horse's age, then keep all layers at that
+    // exact position (old-system horses stack multiple layers per position).
     let photoLayers = horseLayers.map(l => l.url);
     if (horseLayers.length > 1) {
-      const ref = horseLayers[0];
+      const isFoal = (horse.ageInMonths ?? 99) < 6;
+      const sorted = [...horseLayers].sort((a, b) => a.height - b.height);
+      const ref = isFoal ? sorted[0] : sorted[sorted.length - 1];
       const mainLayers = horseLayers.filter(l =>
         Math.abs(l.height - ref.height) < 0.01 &&
         Math.abs(l.left   - ref.left)   < 0.01 &&
