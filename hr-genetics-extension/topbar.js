@@ -6,25 +6,17 @@
 const BTN_ID    = 'hr-genetics-toggle-btn';
 const PANEL_ID  = 'hr-genetics-panel';
 const PANEL_URL = chrome.runtime.getURL('sidebar/sidebar.html');
-const ICON_URL  = chrome.runtime.getURL('icons/icon24.svg');
 
 function injectTopbarButton() {
   if (document.getElementById(BTN_ID)) return;
 
   const btn = document.createElement('button');
-  btn.id        = BTN_ID;
-  btn.title     = 'HR Genetics';
-  btn.className = 'hr-genetics-topbar-btn';
+  btn.id          = BTN_ID;
+  btn.title       = 'HR Genetics';
+  btn.textContent = 'HR Genetics';
+  btn.className   = 'hr-genetics-topbar-btn';
   btn.style.cssText = 'position:fixed;top:10px;right:10px;z-index:99999;';
 
-  const img = document.createElement('img');
-  img.src   = ICON_URL;
-  img.style.cssText = 'width:20px;height:20px;vertical-align:middle;pointer-events:none;';
-  img.onerror = () => {
-    img.remove();
-    btn.textContent = 'HR Genetics';
-  };
-  btn.appendChild(img);
   document.body.appendChild(btn);
 
   btn.addEventListener('click', togglePanel);
