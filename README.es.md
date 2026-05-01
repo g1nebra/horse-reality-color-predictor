@@ -104,10 +104,10 @@ Puedes renombrar, duplicar y eliminar parejas desde la tarjeta de la pareja. La 
 
 HR Color Predictor todavía no está en la Chrome Web Store, así que se instala como extensión sin empaquetar. Configuración inicial:
 
-1. Descarga el `.zip` de la última versión desde la [página de releases](#) y descomprímelo, o clona este repositorio.
+1. Descarga el `.zip` de la última versión desde la [página de releases](https://github.com/g1nebra/horse-reality-color-predictor/releases/latest) y descomprímelo, o clona este repositorio.
 2. En Chrome, ve a `chrome://extensions/`.
 3. Activa el **modo de desarrollador** (esquina superior derecha).
-4. Pulsa **Cargar descomprimida** (Load unpacked) y selecciona la carpeta `hr-genetics-extension/`.
+4. Pulsa **Cargar descomprimida** (Load unpacked) y selecciona la carpeta `hr-color-predictor/`.
 5. Fija la extensión desde el menú del puzzle para que el icono quede visible.
 
 Abre el perfil de cualquier caballo en horsereality.com y deberías ver los dos botones nuevos.
