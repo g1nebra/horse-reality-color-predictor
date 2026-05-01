@@ -111,45 +111,85 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGeno
     ...sharedLoci.filter(l => !LOCUS_ORDER.includes(l)),
   ];
 
+  // Group outcomes by visible phenotype (base + sorted patterns + lethal flag).
+  // Notes are not part of the key so groups merge across genotype variants that
+  // happen to surface different notes (e.g., nd1 markings).
+  const groups = new Map();
+  for (const o of outcomes) {
+    const ph = phenotypeByGenotype.get(o.genotype);
+    const patterns = [...(ph?.patterns ?? [])].sort();
+    const key = `${ph?.base ?? '?'}|${patterns.join('·')}|${ph?.lethal ? 'L' : ''}`;
+    let g = groups.get(key);
+    if (!g) {
+      g = { phenotype: ph, outcomes: [], totalProb: 0, lethal: !!ph?.lethal };
+      groups.set(key, g);
+    }
+    g.outcomes.push(o);
+    g.totalProb += o.probability;
+  }
+  const sortedGroups = [...groups.values()].sort((a, b) => b.totalProb - a.totalProb);
+  for (const g of sortedGroups) {
+    g.outcomes.sort((a, b) => b.probability - a.probability);
+  }
+
   const table = document.createElement('table');
   table.className = 'results-table';
 
-  // Head
+  // Two-column header: outcome name + total probability
   const thead = table.createTHead();
   const headRow = thead.insertRow();
-  const thGeno = document.createElement('th');
-  thGeno.textContent = 'Genotype';
-  const thPheno = document.createElement('th');
-  thPheno.textContent = 'Phenotype';
+  const thOutcome = document.createElement('th');
+  thOutcome.textContent = 'Outcome';
   const thProb = document.createElement('th');
   thProb.className   = 'col-prob';
   thProb.textContent = '%';
-  headRow.append(thGeno, thPheno, thProb);
+  headRow.append(thOutcome, thProb);
 
-  // Body
-  const tbody = table.createTBody();
-  for (const { genotype, probability } of outcomes) {
-    const row = tbody.insertRow();
-    const isLethal = lethalSet.has(genotype);
-    if (isLethal) row.className = 'lethal-row';
+  // One <tbody> per phenotype group: header row with phenotype + total %,
+  // followed by detail rows for each contributing genotype + its individual %.
+  for (const group of sortedGroups) {
+    const tbody = document.createElement('tbody');
+    tbody.className = 'group';
+    if (group.lethal) tbody.classList.add('lethal-group');
 
-    const tdGeno = row.insertCell();
-    tdGeno.className = 'genotype-cell';
-    tdGeno.appendChild(buildGenotypeCell(genotype, orderedLoci));
-    if (isLethal) {
+    const headerRow = document.createElement('tr');
+    headerRow.className = 'group-header';
+    if (group.lethal) headerRow.classList.add('lethal-row');
+
+    const headerCell = document.createElement('td');
+    headerCell.className = 'phenotype-cell group-phenotype';
+    headerCell.appendChild(buildPhenotypeCell(group.phenotype));
+    if (group.lethal) {
       const tag = document.createElement('span');
       tag.className   = 'lethal-tag';
       tag.textContent = 'lethal';
-      tdGeno.appendChild(tag);
+      headerCell.appendChild(tag);
     }
 
-    const tdPheno = row.insertCell();
-    tdPheno.className = 'phenotype-cell';
-    tdPheno.appendChild(buildPhenotypeCell(phenotypeByGenotype.get(genotype)));
+    const headerProb = document.createElement('td');
+    headerProb.className   = 'col-prob group-total-prob';
+    headerProb.textContent = formatProbability(group.totalProb);
 
-    const tdProb = row.insertCell();
-    tdProb.className   = 'col-prob';
-    tdProb.textContent = formatProbability(probability);
+    headerRow.append(headerCell, headerProb);
+    tbody.appendChild(headerRow);
+
+    for (const { genotype, probability } of group.outcomes) {
+      const detailRow = document.createElement('tr');
+      detailRow.className = 'group-detail';
+
+      const detailCell = document.createElement('td');
+      detailCell.className = 'genotype-cell group-genotype';
+      detailCell.appendChild(buildGenotypeCell(genotype, orderedLoci));
+
+      const detailProb = document.createElement('td');
+      detailProb.className   = 'col-prob group-detail-prob';
+      detailProb.textContent = formatProbability(probability);
+
+      detailRow.append(detailCell, detailProb);
+      tbody.appendChild(detailRow);
+    }
+
+    table.appendChild(tbody);
   }
 
   return table;

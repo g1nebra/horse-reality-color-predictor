@@ -180,7 +180,20 @@ function renderHorseSlot(pairing, role, callbacks) {
   const content = document.createElement('div');
   content.className = 'horse-slot-content';
 
-  content.appendChild(renderHorsePhoto(horse));
+  const photo = renderHorsePhoto(horse);
+  if (horse.url) {
+    const photoLink = document.createElement('a');
+    photoLink.className = 'horse-photo-link';
+    photoLink.href      = horse.url;
+    photoLink.target    = '_blank';
+    photoLink.rel       = 'noopener noreferrer';
+    photoLink.title     = `Open ${horse.name || 'horse'}'s profile`;
+    photoLink.addEventListener('click', (e) => e.stopPropagation());
+    photoLink.appendChild(photo);
+    content.appendChild(photoLink);
+  } else {
+    content.appendChild(photo);
+  }
 
   // Info
   const info = document.createElement('div');

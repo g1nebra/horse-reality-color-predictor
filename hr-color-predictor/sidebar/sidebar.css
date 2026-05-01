@@ -304,6 +304,19 @@ button {
   overflow: hidden;
 }
 
+/* Anchor wrapping the photo, opens the horse's profile in a new tab */
+.horse-photo-link {
+  display: block;
+  flex-shrink: 0;
+  text-decoration: none;
+  border-radius: 3px;
+}
+.horse-photo-link:hover .horse-photo-stack,
+.horse-photo-link:hover .horse-photo-placeholder {
+  border-color: var(--p700);
+  box-shadow: 0 0 0 1px var(--p700);
+}
+
 /* Stacked PNG layers, each layer is absolutely positioned on top of the previous */
 .horse-photo-stack {
   position: relative;
@@ -651,12 +664,66 @@ button {
 
 .results-table thead th.col-prob { text-align: right; }
 
-.results-table tbody tr:nth-child(odd)  { background: var(--white); }
-.results-table tbody tr:nth-child(even) { background: var(--p000); }
-.results-table tbody tr:hover           { background: var(--p100); }
-.results-table tbody tr { border-bottom: 1px solid var(--p100); }
+/* Alternate background per phenotype group rather than per row */
+.results-table tbody.group:nth-of-type(odd)  { background: var(--white); }
+.results-table tbody.group:nth-of-type(even) { background: var(--p000); }
+.results-table tbody.group:hover             { background: var(--p100); }
+.results-table tbody.group { border-bottom: 1px solid var(--p200); }
 
 .results-table td { padding: 5px 7px; vertical-align: top; }
+
+/* Group header: visible phenotype + total probability for the group.
+   Header sits above a divider so the phenotype/genotype split is visible. */
+.results-table tr.group-header td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--p200);
+}
+.results-table tr.group-header td.group-phenotype {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--p600);
+}
+.results-table tr.group-header td.group-phenotype .phenotype-base {
+  font-weight: 400;
+  color: var(--p600);
+}
+.results-table tr.group-header td.group-total-prob {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Group detail rows: indented genotype + its individual probability. */
+.results-table tr.group-detail td {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 10px;
+}
+.results-table tr.group-detail + tr.group-detail td {
+  border-top: 1px solid var(--p100);
+}
+.results-table tr.group-detail td.group-genotype {
+  padding-left: 22px;
+  position: relative;
+  color: var(--p700);
+}
+.results-table tr.group-detail td.group-genotype::before {
+  content: '↳';
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  color: var(--p400);
+}
+.results-table tr.group-detail td.group-detail-prob {
+  color: var(--p600);
+  font-weight: 500;
+}
+.results-table tr.group-detail:last-child td {
+  padding-bottom: 8px;
+}
+.results-table tr.group-detail:first-of-type td {
+  padding-top: 7px;
+}
 
 .genotype-cell {
   font-family: 'Roboto Mono', 'Courier New', monospace;
