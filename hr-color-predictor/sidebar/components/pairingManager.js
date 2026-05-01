@@ -30,7 +30,7 @@ export function savePairings(pairings) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [STORAGE_KEY]: sanitized }, () => {
       if (chrome.runtime.lastError) {
-        console.error('[HR Genetics] savePairings failed:', chrome.runtime.lastError.message);
+        console.error('[HR Color Predictor] savePairings failed:', chrome.runtime.lastError.message);
         reject(chrome.runtime.lastError);
       } else {
         resolve();

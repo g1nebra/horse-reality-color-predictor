@@ -79,19 +79,15 @@ window.addEventListener('message', (e) => {
 // and relay via iframe.contentWindow.postMessage (avoids chrome.runtime issues
 // when the sidebar isn't already open)
 document.addEventListener('hr-genetics-pick', (e) => {
-  console.log('[HR Genetics topbar] hr-genetics-pick received:', e.detail);
   const msg = { type: 'HR_PICK_HORSE', ...e.detail };
 
   const existing = document.getElementById(PANEL_ID);
   if (existing) {
-    console.log('[HR Genetics topbar] panel already open, posting message');
     existing.contentWindow.postMessage(msg, '*');
   } else {
-    console.log('[HR Genetics topbar] opening panel then posting message');
     openPanel();
     const iframe = document.getElementById(PANEL_ID);
     iframe.addEventListener('load', () => {
-      console.log('[HR Genetics topbar] iframe loaded, posting message');
       iframe.contentWindow.postMessage(msg, '*');
     }, { once: true });
   }

@@ -273,7 +273,7 @@ The sidebar is **manually triggered** by the user via the extension's browser ac
 ### 5.2 File Structure
 
 ```
-hr-genetics-extension/
+hr-color-predictor/
   manifest.json
   content.js
   sidebar/

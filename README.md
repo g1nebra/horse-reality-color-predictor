@@ -104,10 +104,10 @@ You can rename, duplicate, and delete pairings from the pairing card. The arrow 
 
 HR Color Predictor isn't on the Chrome Web Store yet, so you'll load it as an unpacked extension. One-time setup:
 
-1. Download the latest release `.zip` from the [releases page](#) and unzip it, or clone this repo.
+1. Download the latest release `.zip` from the [releases page](https://github.com/g1nebra/horse-reality-color-predictor/releases/latest) and unzip it, or clone this repo.
 2. In Chrome, go to `chrome://extensions/`.
 3. Toggle **Developer mode** on (top-right).
-4. Click **Load unpacked** and select the `hr-genetics-extension/` folder.
+4. Click **Load unpacked** and select the `hr-color-predictor/` folder.
 5. Pin the extension from the puzzle-piece menu so the icon stays visible.
 
 Open any horse's profile on horsereality.com and you should see the two new buttons.
