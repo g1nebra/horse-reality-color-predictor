@@ -76,7 +76,6 @@ function bindStaticEvents() {
 // Buffer the message if it arrives before init() finishes loading pairings.
 
 window.addEventListener('message', (e) => {
-  console.log('[HR Genetics sidebar] window message received:', e.data?.type, e.data);
   if (e.data?.type === 'HR_PICK_HORSE') {
     if (!initComplete) {
       bufferedPickMsg = e.data;
