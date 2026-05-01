@@ -186,7 +186,7 @@ The dosage of LP combined with pattern modifiers determines the expressed phenot
 ---
 
 **Resolver rule:**  
-Show as a single overlay phenotype name. Possible outputs: *"Varnish Roan"*, *"Near Leopard"*, *"Leopard"*, *"Near Few-Spot"*, *"Few-Spot Leopard"*, *"Spotted Snowcap Blanket"*, *"White Snowcap Blanket"*. Don't list LP / PATN1 / PATN2 as separate entries.
+Show as a single overlay phenotype name. Possible outputs: *"Varnish"*, *"Blanket"*, *"Leopard"*, *"Snowcap"*, *"Few-Spot Leopard"*. Don't list LP / PATN1 / PATN2 as separate entries.
 
 ---
 ### 13. Lethal combinations
