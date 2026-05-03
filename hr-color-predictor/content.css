@@ -6,7 +6,7 @@
   border: 2px solid #1c5072;
   border-radius: 4px;
   color: #fff;
-  cursor: pointer;
+  cursor: grab;
   font-size: 11px;
   font-weight: 700;
   font-family: inherit;
@@ -15,6 +15,13 @@
   align-items: center;
   gap: 4px;
   transition: background-color 0.12s, border-color 0.12s;
+  touch-action: none;
+}
+
+.hr-genetics-topbar-btn.dragging {
+  cursor: grabbing;
+  user-select: none;
+  opacity: 0.85;
 }
 
 .hr-genetics-topbar-btn:hover {
@@ -22,10 +29,16 @@
   border-color: #407f9c;
 }
 
-
-#hr-genetics-pick-badge {
+#hr-genetics-toolbar {
   position: fixed;
   z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+#hr-genetics-pick-badge {
   display: flex;
   flex-direction: column;
   gap: 3px;

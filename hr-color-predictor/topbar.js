@@ -3,25 +3,36 @@
 // overlaid on the right side of the page.
 
 
-const BTN_ID    = 'hr-genetics-toggle-btn';
-const PANEL_ID  = 'hr-genetics-panel';
-const PANEL_URL = chrome.runtime.getURL('sidebar/sidebar.html');
+const BTN_ID     = 'hr-genetics-toggle-btn';
+const TOOLBAR_ID = 'hr-genetics-toolbar';
+const PANEL_ID   = 'hr-genetics-panel';
+const PANEL_URL  = chrome.runtime.getURL('sidebar/sidebar.html');
+const POSITION_STORAGE_KEY = 'hr-toolbar-position';
+const DEFAULT_POSITION = { top: 10, right: 10 };
+const DRAG_THRESHOLD_PX = 5;
 
-function injectTopbarButton() {
-  if (document.getElementById(BTN_ID)) return;
+async function injectTopbarButton() {
+  if (document.getElementById(TOOLBAR_ID)) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.id = TOOLBAR_ID;
 
   const btn = document.createElement('button');
   btn.id          = BTN_ID;
-  btn.title       = 'HR Genetics';
+  btn.title       = 'HR Genetics. Drag to move, right-click to reset position';
   btn.textContent = 'HR Genetics';
   btn.className   = 'hr-genetics-topbar-btn';
-  btn.style.cssText = 'position:fixed;top:10px;right:10px;z-index:99999;';
 
-  document.body.appendChild(btn);
+  wrapper.appendChild(btn);
+  document.body.appendChild(wrapper);
+
+  // Initial position priority: user-saved > Config Highlighter anchor > default top-right.
+  const saved = await loadSavedPosition();
+  applyPosition(wrapper, saved ?? configHighlighterAnchor() ?? DEFAULT_POSITION);
 
   btn.addEventListener('click', togglePanel);
-
-  positionBelowConfigHighlighter(btn);
+  attachDragHandlers(btn, wrapper);
+  attachResetHandler(btn, wrapper);
 }
 
 const PANEL_WIDTH = 340;
@@ -93,27 +104,99 @@ document.addEventListener('hr-genetics-pick', (e) => {
   }
 });
 
-// Positioning below Config Highlighter (my other extension :s)
-function positionBelowConfigHighlighter(myBtn) {
-  if (nudge(myBtn)) return;
-
-  const observer = new MutationObserver(() => {
-    if (nudge(myBtn)) observer.disconnect();
+function loadSavedPosition() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(POSITION_STORAGE_KEY, (data) => {
+      resolve(data[POSITION_STORAGE_KEY] ?? null);
+    });
   });
-  observer.observe(document.body, { childList: true, subtree: true });
-  setTimeout(() => observer.disconnect(), 5000);
 }
 
-function nudge(myBtn) {
-  const cfgBtn = [...document.querySelectorAll('button')].find(b =>
-    b !== myBtn && (b.getAttribute('style') || '').includes('position: fixed')
-  );
-  if (!cfgBtn) return false;
+function savePosition(pos) {
+  chrome.storage.local.set({ [POSITION_STORAGE_KEY]: pos });
+}
 
-  const rect = cfgBtn.getBoundingClientRect();
-  myBtn.style.top   = (rect.bottom + 4) + 'px';
-  myBtn.style.right = (window.innerWidth - rect.right) + 'px';
-  return true;
+function clearSavedPosition() {
+  chrome.storage.local.remove(POSITION_STORAGE_KEY);
+}
+
+// Anchor below the "Config Highlighter" button (my other extension) when present.
+// Identified by visible text rather than any fixed-position button so unrelated
+// extensions/userscripts no longer get matched.
+function configHighlighterAnchor() {
+  const cfg = [...document.querySelectorAll('button')]
+    .find(b => b.innerText.trim() === 'Config Highlighter');
+  if (!cfg) return null;
+  const r = cfg.getBoundingClientRect();
+  return { top: r.bottom + 4, right: window.innerWidth - r.right };
+}
+
+function applyPosition(target, { top, right }) {
+  target.style.top   = top + 'px';
+  target.style.right = right + 'px';
+}
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function attachDragHandlers(btn, wrapper) {
+  let dragging      = false;
+  let suppressClick = false;
+  let startX = 0, startY = 0;
+  let originRight = 0, originTop = 0;
+
+  btn.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    btn.setPointerCapture(e.pointerId);
+    dragging      = false;
+    suppressClick = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = wrapper.getBoundingClientRect();
+    originRight = window.innerWidth - rect.right;
+    originTop   = rect.top;
+  });
+
+  btn.addEventListener('pointermove', (e) => {
+    if (!btn.hasPointerCapture(e.pointerId)) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!dragging && Math.hypot(dx, dy) >= DRAG_THRESHOLD_PX) {
+      dragging      = true;
+      suppressClick = true;
+      btn.classList.add('dragging');
+    }
+    if (dragging) {
+      const newTop   = clamp(originTop   + dy, 0, window.innerHeight - wrapper.offsetHeight);
+      const newRight = clamp(originRight - dx, 0, window.innerWidth  - wrapper.offsetWidth);
+      applyPosition(wrapper, { top: newTop, right: newRight });
+    }
+  });
+
+  btn.addEventListener('pointerup', (e) => {
+    if (!btn.hasPointerCapture(e.pointerId)) return;
+    btn.releasePointerCapture(e.pointerId);
+    btn.classList.remove('dragging');
+    if (dragging) {
+      const rect = wrapper.getBoundingClientRect();
+      savePosition({ top: rect.top, right: window.innerWidth - rect.right });
+    }
+  });
+
+  btn.addEventListener('click', (e) => {
+    if (suppressClick) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      suppressClick = false;
+    }
+  }, true);
+}
+
+function attachResetHandler(btn, wrapper) {
+  btn.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    clearSavedPosition();
+    applyPosition(wrapper, configHighlighterAnchor() ?? DEFAULT_POSITION);
+  });
 }
 
 // Init

@@ -44,11 +44,37 @@ export function renderResults(pairing) {
     return panel;
   }
 
-  // Summary line
+  const orderedLoci = [
+    ...LOCUS_ORDER.filter(l => sharedLoci.includes(l)),
+    ...sharedLoci.filter(l => !LOCUS_ORDER.includes(l)),
+  ];
+
+  // Summary line with clickable loci. Each locus expands a breakdown panel
+  // showing homozygous/heterozygous probability and per-genotype probabilities
+  // for that locus alone.
   const summary = document.createElement('div');
-  summary.className   = 'results-summary';
-  summary.textContent = `${outcomes.length} possible genotype${outcomes.length === 1 ? '' : 's'} · loci: ${sharedLoci.join(', ')}`;
+  summary.className = 'results-summary';
+
+  const summaryText = document.createElement('span');
+  summaryText.textContent = `${outcomes.length} possible genotype${outcomes.length === 1 ? '' : 's'} · loci: `;
+  summary.appendChild(summaryText);
+
+  const breakdownContainer = document.createElement('div');
+  breakdownContainer.className = 'locus-breakdowns';
+
+  orderedLoci.forEach((locus, i) => {
+    const btn = document.createElement('button');
+    btn.type        = 'button';
+    btn.className   = 'locus-button';
+    btn.textContent = locus;
+    btn.title       = `Click to see ${locus} probability breakdown`;
+    btn.addEventListener('click', () => toggleLocusBreakdown(locus, btn, breakdownContainer, outcomes));
+    summary.appendChild(btn);
+    if (i < orderedLoci.length - 1) summary.appendChild(document.createTextNode(', '));
+  });
+
   panel.appendChild(summary);
+  panel.appendChild(breakdownContainer);
 
   // Partial test disclaimer
   if (damResult.partiallyTested || sireResult.partiallyTested) {
@@ -274,6 +300,99 @@ function buildGenotypeCell(genotype, orderedLoci) {
   });
 
   return frag;
+}
+
+// Per-locus breakdown
+//
+// Click handler for a locus button in the summary line. Toggles a panel that
+// shows the homozygous/heterozygous split and per-genotype probabilities for
+// that locus alone.
+function toggleLocusBreakdown(locus, btn, container, outcomes) {
+  const id = `locus-breakdown-${locus}`;
+  const existing = container.querySelector(`[data-locus="${locus}"]`);
+  if (existing) {
+    existing.remove();
+    btn.classList.remove('locus-button-active');
+    return;
+  }
+
+  const breakdown = computeLocusBreakdown(outcomes, locus);
+  const panel = renderLocusBreakdown(locus, breakdown);
+  panel.dataset.locus = locus;
+  panel.id = id;
+  container.appendChild(panel);
+  btn.classList.add('locus-button-active');
+}
+
+function computeLocusBreakdown(outcomes, locus) {
+  let homozygousProb   = 0;
+  let heterozygousProb = 0;
+  const groups = new Map();
+
+  for (const o of outcomes) {
+    const alleles = o.genotype[locus];
+    if (!alleles) continue;
+
+    if (alleles[0] === alleles[1]) homozygousProb   += o.probability;
+    else                            heterozygousProb += o.probability;
+
+    const sorted = sortAllelesCanonical([alleles[0], alleles[1]]);
+    const key = `${sorted[0]}/${sorted[1]}`;
+    groups.set(key, (groups.get(key) ?? 0) + o.probability);
+  }
+
+  return {
+    homozygous:   homozygousProb,
+    heterozygous: heterozygousProb,
+    perGenotype:  [...groups.entries()].sort((a, b) => b[1] - a[1]),
+  };
+}
+
+// Sort alleles so dominant (uppercase-starting) come first, then alphabetical
+// within case. Gives "D/nd1" rather than "nd1/D", "A/a" rather than "a/A".
+function sortAllelesCanonical(alleles) {
+  return [...alleles].sort((a, b) => {
+    const aIsUpper = a[0] === a[0].toUpperCase();
+    const bIsUpper = b[0] === b[0].toUpperCase();
+    if (aIsUpper !== bIsUpper) return aIsUpper ? -1 : 1;
+    return a.localeCompare(b);
+  });
+}
+
+function renderLocusBreakdown(locus, breakdown) {
+  const panel = document.createElement('div');
+  panel.className = 'locus-breakdown';
+
+  const heading = document.createElement('div');
+  heading.className   = 'locus-breakdown-heading';
+  heading.textContent = locus;
+  panel.appendChild(heading);
+
+  const summary = document.createElement('div');
+  summary.className = 'locus-breakdown-summary';
+  const homo = document.createElement('span');
+  homo.innerHTML = `Homozygous: <strong>${formatProbability(breakdown.homozygous)}</strong>`;
+  const het = document.createElement('span');
+  het.innerHTML = `Heterozygous: <strong>${formatProbability(breakdown.heterozygous)}</strong>`;
+  summary.append(homo, document.createTextNode(' · '), het);
+  panel.appendChild(summary);
+
+  const list = document.createElement('ul');
+  list.className = 'locus-breakdown-list';
+  for (const [key, prob] of breakdown.perGenotype) {
+    const li = document.createElement('li');
+    const geno = document.createElement('span');
+    geno.className   = 'locus-breakdown-genotype';
+    geno.textContent = key;
+    const probEl = document.createElement('span');
+    probEl.className   = 'locus-breakdown-prob';
+    probEl.textContent = formatProbability(prob);
+    li.append(geno, probEl);
+    list.appendChild(li);
+  }
+  panel.appendChild(list);
+
+  return panel;
 }
 
 // Probability formatter

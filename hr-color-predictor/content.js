@@ -92,34 +92,30 @@ function sexToRole(sex) {
   return 'both'; // gelding, unknown
 }
 
-// Fixed-position badge
-const BADGE_ID  = 'hr-genetics-pick-badge';
-const HR_BTN_ID = 'hr-genetics-toggle-btn';
+const BADGE_ID   = 'hr-genetics-pick-badge';
+const HR_BTN_ID  = 'hr-genetics-toggle-btn';
+const HR_TOOLBAR_ID = 'hr-genetics-toolbar';
+
+const DISABLED_TOOLTIP =
+  'Disabled. Make sure the horse is color tested, and try opening the Colour tab or reloading the page (data is read from there). Other browser extensions or scripts may interfere with the data extraction. If it still does not work, please report it with as much info as possible.';
 
 function injectBadge(role) {
-  if (document.getElementById(BADGE_ID)) return;
+  if (document.getElementById(BADGE_ID)) return true;
 
-  const hrBtn = document.getElementById(HR_BTN_ID);
-  if (!hrBtn) return;
+  const wrapper = document.getElementById(HR_TOOLBAR_ID);
+  if (!wrapper) return false;
 
   const badge = document.createElement('div');
   badge.id = BADGE_ID;
   badge.innerHTML = `
-    ${role !== 'sire' ? '<button id="hr-pick-dam"  disabled title="Loading…">♀ Add as Dam</button>'  : ''}
-    ${role !== 'dam'  ? '<button id="hr-pick-sire" disabled title="Loading…">♂ Add as Sire</button>' : ''}
+    ${role !== 'sire' ? `<button id="hr-pick-dam"  disabled data-tooltip="${DISABLED_TOOLTIP}">♀ Add as Dam</button>`  : ''}
+    ${role !== 'dam'  ? `<button id="hr-pick-sire" disabled data-tooltip="${DISABLED_TOOLTIP}">♂ Add as Sire</button>` : ''}
   `;
-  document.body.appendChild(badge);
-
-  positionBadge(badge, hrBtn);
+  wrapper.appendChild(badge);
 
   badge.querySelector('#hr-pick-dam') ?.addEventListener('click', () => pickHorse('dam'));
   badge.querySelector('#hr-pick-sire')?.addEventListener('click', () => pickHorse('sire'));
-}
-
-function positionBadge(badge, hrBtn) {
-  const r = hrBtn.getBoundingClientRect();
-  badge.style.top   = (r.bottom + 4) + 'px';
-  badge.style.right = (window.innerWidth - r.right) + 'px';
+  return true;
 }
 
 function enableBadgeButtons(rows) {
@@ -128,8 +124,16 @@ function enableBadgeButtons(rows) {
   const untested = isFullyUntested(rows);
   const dam  = badge.querySelector('#hr-pick-dam');
   const sire = badge.querySelector('#hr-pick-sire');
-  if (dam)  { dam.disabled  = untested; dam.title  = untested ? 'No test results' : 'Add this mare as Dam'; }
-  if (sire) { sire.disabled = untested; sire.title = untested ? 'No test results' : 'Add this stallion as Sire'; }
+  if (dam) {
+    dam.disabled = untested;
+    if (untested) { dam.dataset.tooltip = DISABLED_TOOLTIP; dam.removeAttribute('title'); }
+    else          { delete dam.dataset.tooltip; dam.title = 'Add this mare as Dam'; }
+  }
+  if (sire) {
+    sire.disabled = untested;
+    if (untested) { sire.dataset.tooltip = DISABLED_TOOLTIP; sire.removeAttribute('title'); }
+    else          { delete sire.dataset.tooltip; sire.title = 'Add this stallion as Sire'; }
+  }
 }
 
 // Pick handler. Fires when the user clicks a badge button
@@ -145,79 +149,88 @@ function pickHorse(role) {
   }));
 }
 
-// Init
-// Only run on actual horse profile pages (/horses/<id>)
-// Fetch horse data from the API immediately (no DOM dependency)
-(async function init() {
+// Init. Runs on horse profile pages (/horses/<numeric-id>).
+//
+// The role (dam/sire/both) is decided BEFORE the badge is injected, so the
+// user only ever sees the relevant button. The role comes from the API; if
+// the API is slow or fails, a safety timeout falls back to 'both' so the
+// extension stays usable on flaky networks.
+const ROLE_FETCH_TIMEOUT_MS = 8000;
 
+(function init() {
   const horseId = getHorseId();
   if (!horseId) return;
 
-  const horse = await fetchHorse(horseId);
-
-  if (horse) {
-    // Background layers have no `height` field; all horse layers do.
-    // height/left/up come as strings from the API, parse them explicitly.
-    const horseLayers = (horse.imageLayers ?? [])
-      .filter(l => l.url && l.height != null)
-      .map(l => ({ ...l, height: parseFloat(l.height), left: parseFloat(l.left), up: parseFloat(l.up) }));
-
-    // When a foal under 6 months shares the page with its dam, both horses'
-    // layers come back in `imageLayers`. Each horse occupies one distinct
-    // height/left/up triple, and foals always render smaller (lower `height`).
-    // Pick the size matching this horse's age, then keep all layers at that
-    // exact position (old-system horses stack multiple layers per position).
-    let photoLayers = horseLayers.map(l => l.url);
-    if (horseLayers.length > 1) {
-      const isFoal = (horse.ageInMonths ?? 99) < 6;
-      const sorted = [...horseLayers].sort((a, b) => a.height - b.height);
-      const ref = isFoal ? sorted[0] : sorted[sorted.length - 1];
-      const mainLayers = horseLayers.filter(l =>
-        Math.abs(l.height - ref.height) < 0.01 &&
-        Math.abs(l.left   - ref.left)   < 0.01 &&
-        Math.abs(l.up     - ref.up)     < 0.01
-      );
-      if (mainLayers.length > 0) photoLayers = mainLayers.map(l => l.url);
-    }
-
-    cachedMeta = {
-      name:        horse.name   ?? '',
-      breed:       horse.breed?.name ?? '',
-      gender:      horse.sex    ?? '',
-      url:         window.location.href,
-      photoLayers,
-      photoUrl:    photoLayers[0] ?? null,
-    };
-  }
-
-  const role = sexToRole(horse?.sex);
-
-  // Watch for the topbar button and genetics rows, both injected dynamically
-  let badgeInjected  = false;
-  let geneticsReady  = false;
-  let observer       = null;
+  let currentRole   = null;
+  let badgeInjected = false;
+  let geneticsReady = false;
+  let observer      = null;
 
   function check() {
-    if (!badgeInjected && document.getElementById(HR_BTN_ID)) {
-      injectBadge(role);
-      badgeInjected = true;
+    if (!badgeInjected && currentRole !== null && document.getElementById(HR_BTN_ID)) {
+      badgeInjected = injectBadge(currentRole);
+      if (badgeInjected && geneticsReady) enableBadgeButtons(readGeneticsRows());
     }
     if (!geneticsReady) {
       const rows = readGeneticsRows();
       if (rows.length > 0) {
         geneticsReady = true;
-        enableBadgeButtons(rows);
+        if (badgeInjected) enableBadgeButtons(rows);
       }
     }
-    if (badgeInjected && geneticsReady) {
-      observer?.disconnect();
-    }
+    if (badgeInjected && geneticsReady) observer?.disconnect();
   }
 
+  observer = new MutationObserver(check);
+  observer.observe(document.body, { childList: true, subtree: true });
+  setTimeout(() => observer?.disconnect(), 60_000);
   check();
-  if (!badgeInjected || !geneticsReady) {
-    observer = new MutationObserver(check);
-    observer.observe(document.body, { childList: true, subtree: true });
-    setTimeout(() => observer?.disconnect(), 60_000);
-  }
+
+  let resolved = false;
+  const finalize = (role) => {
+    if (resolved) return;
+    resolved = true;
+    currentRole = role;
+    check();
+  };
+
+  fetchHorse(horseId).then(horse => {
+    if (horse) {
+      const horseLayers = (horse.imageLayers ?? [])
+        .filter(l => l.url && l.height != null)
+        .map(l => ({ ...l, height: parseFloat(l.height), left: parseFloat(l.left), up: parseFloat(l.up) }));
+
+      // When a foal under 6 months shares the page with its dam, both horses'
+      // layers come back in `imageLayers`. Each horse occupies one distinct
+      // height/left/up triple, and foals render smaller (lower `height`). Pick
+      // the size matching this horse's age, then keep all layers at that exact
+      // position (old-system horses stack multiple layers per position).
+      let photoLayers = horseLayers.map(l => l.url);
+      if (horseLayers.length > 1) {
+        const isFoal = (horse.ageInMonths ?? 99) < 6;
+        const sorted = [...horseLayers].sort((a, b) => a.height - b.height);
+        const ref = isFoal ? sorted[0] : sorted[sorted.length - 1];
+        const mainLayers = horseLayers.filter(l =>
+          Math.abs(l.height - ref.height) < 0.01 &&
+          Math.abs(l.left   - ref.left)   < 0.01 &&
+          Math.abs(l.up     - ref.up)     < 0.01
+        );
+        if (mainLayers.length > 0) photoLayers = mainLayers.map(l => l.url);
+      }
+
+      cachedMeta = {
+        name:        horse.name   ?? '',
+        breed:       horse.breed?.name ?? '',
+        gender:      horse.sex    ?? '',
+        url:         window.location.href,
+        photoLayers,
+        photoUrl:    photoLayers[0] ?? null,
+      };
+      finalize(sexToRole(horse.sex));
+    } else {
+      finalize('both');
+    }
+  });
+
+  setTimeout(() => finalize('both'), ROLE_FETCH_TIMEOUT_MS);
 })();
