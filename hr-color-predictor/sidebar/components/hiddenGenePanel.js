@@ -145,10 +145,7 @@ function renderAgoutiRow(horse, locusKey, slots, onUpdate) {
 
     sel.addEventListener('change', () => {
       resolvedPair[slotIndex] = sel.value;
-      onUpdate({
-        ...horse.hiddenGeneToggles,
-        [locusKey]: [...resolvedPair],
-      });
+      onUpdate({ [locusKey]: [...resolvedPair] });
     });
 
     slotWrapper.append(lbl, sel);
@@ -190,10 +187,7 @@ function renderModifierRow(horse, modifier, onUpdate) {
 
   sel.addEventListener('change', () => {
     const chosen = options.find(p => pairKey(p) === sel.value) ?? defaultPair;
-    onUpdate({
-      ...horse.hiddenGeneToggles,
-      [key]: [...chosen],
-    });
+    onUpdate({ [key]: [...chosen] });
   });
 
   slotWrapper.appendChild(sel);

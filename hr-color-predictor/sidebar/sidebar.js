@@ -233,7 +233,8 @@ async function onToggleUpdate(pairingId, role, toggles) {
   const pairing = pairings.find(p => p.id === pairingId);
   if (!pairing) return;
 
-  const updated = updateToggles(pairing, role, toggles);
+  const currentToggles = pairing[role]?.hiddenGeneToggles ?? {};
+  const updated = updateToggles(pairing, role, { ...currentToggles, ...toggles });
   pairings = replacePairing(pairings, updated);
   await savePairings(pairings);
 
