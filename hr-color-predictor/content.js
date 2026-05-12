@@ -196,7 +196,7 @@ const ROLE_FETCH_TIMEOUT_MS = 8000;
 
   fetchHorse(horseId).then(horse => {
     if (horse) {
-      const horseLayers = (horse.imageLayers ?? [])
+      const horseLayers = (horse.imageFull ?? horse.imageLayers ?? [])
         .filter(l => l.url && l.height != null)
         .map(l => ({ ...l, height: parseFloat(l.height), left: parseFloat(l.left), up: parseFloat(l.up) }));
 
