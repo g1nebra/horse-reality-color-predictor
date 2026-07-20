@@ -6,9 +6,37 @@
 import { parseGenotype }      from '../../engine/genotypeParser.js';
 import { calculateOffspring } from '../../engine/punnettEngine.js';
 import { resolvePhenotype }   from '../../engine/phenotypeResolver.js';
+import coatVariations         from '../../data/coatVariations.js';
 
 // Canonical locus display order. Base colour → dilutes → modifiers → grey.
 const LOCUS_ORDER = ['E', 'A', 'CR', 'D', 'CH', 'Z', 'mu', 'f', 'STY', 'PA', 'G'];
+
+// Inherited variations ride on a hidden numeric value that is bred up by breeding
+// horses that show the variation, or that have it in their family line. We can't
+// read that number, so we surface a relative level from how the parents are marked.
+const MARKER_WEIGHT = { expresses: 2, line: 1, none: 0 };
+
+const CHANCE_LABELS = {
+  random:    'random',
+  low:       'low chance',
+  increased: 'increased chance',
+  high:      'high chance',
+};
+
+function chanceLevelFor(key, dam, sire) {
+  if (coatVariations[key]?.inheritance === 'random') return 'random';
+  const score = (MARKER_WEIGHT[dam?.variationMarkers?.[key]]  ?? 0)
+              + (MARKER_WEIGHT[sire?.variationMarkers?.[key]] ?? 0);
+  if (score >= 3) return 'high';
+  if (score >= 1) return 'increased';
+  return 'low';
+}
+
+// "a", "a and b", "a, b and c"
+function listJoin(items) {
+  if (items.length <= 1) return items[0] ?? '';
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
+}
 
 // Main export
 /**
@@ -116,11 +144,78 @@ export function renderResults(pairing) {
     panel.appendChild(warning);
   }
 
+  // Special coat variations any outcome is eligible for, plus the relative chance
+  // level implied by how the two parents are marked.
+  const shownVariations = new Set();
+  for (const ph of phenotypeByGenotype.values()) {
+    for (const key of ph?.variations ?? []) shownVariations.add(key);
+  }
+
+  const chanceLevels = {};
+  for (const key of shownVariations) {
+    chanceLevels[key] = chanceLevelFor(key, pairing.dam, pairing.sire);
+  }
+
+  if (shownVariations.size > 0) {
+    panel.appendChild(buildVariationNote([...shownVariations]));
+  }
+
   // Table
-  const table = buildTable(outcomes, sharedLoci, lethalSet, phenotypeByGenotype);
+  const table = buildTable(outcomes, sharedLoci, lethalSet, phenotypeByGenotype, chanceLevels);
   panel.appendChild(table);
 
   return panel;
+}
+
+// Disclaimer explaining the two kinds of special coat variation currently in play.
+function buildVariationNote(keys) {
+  const note = document.createElement('div');
+  note.className = 'results-variation-note';
+
+  const badge = document.createElement('span');
+  badge.className   = 'results-variation-badge';
+  badge.textContent = 'info';
+
+  const text = document.createElement('span');
+  text.className = 'results-variation-text';
+
+  const randomLabels    = keys.filter(k => coatVariations[k]?.inheritance === 'random')
+                              .map(k => coatVariations[k].label);
+  const inheritedLabels = keys.filter(k => coatVariations[k]?.inheritance === 'inherited')
+                              .map(k => coatVariations[k].label);
+
+  const parts = [];
+  if (randomLabels.length > 0) {
+    parts.push(
+      `${listJoin(randomLabels)} ${randomLabels.length === 1 ? 'is' : 'are'} COMPLETELY RANDOM: `
+      + 'the parents’ coats do not affect it and it cannot be inherited or bred for.',
+    );
+  }
+  if (inheritedLabels.length > 0) {
+    parts.push(
+      `${listJoin(inheritedLabels)} ${inheritedLabels.length === 1 ? 'is' : 'are'} inheritable `
+      + 'through hidden numeric genetics. Mark each parent as expressing it, or having it in '
+      + 'their family line, to raise the chance shown. Horses that do not show it still carry '
+      + 'the alleles and can pass them on.',
+    );
+  }
+  parts.push(
+    'The real odds are hidden, so this tool shows eligibility and a relative chance level, '
+    + 'not a computed probability.',
+  );
+
+  text.textContent = parts.join(' ') + ' ';
+
+  const source = document.createElement('a');
+  source.className   = 'results-variation-source';
+  source.href        = 'https://horsereality.wiki/en/Horses/Breeding/Inheritance-101';
+  source.target      = '_blank';
+  source.rel         = 'noopener noreferrer';
+  source.textContent = 'Source';
+  text.appendChild(source);
+
+  note.append(badge, text);
+  return note;
 }
 
 // Table builder
@@ -130,7 +225,7 @@ export function renderResults(pairing) {
  * @param {string[]} sharedLoci
  * @returns {HTMLTableElement}
  */
-function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGenotype = new Map()) {
+function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGenotype = new Map(), chanceLevels = {}) {
   // Sort loci in canonical display order, unknown loci appended at end
   const orderedLoci = [
     ...LOCUS_ORDER.filter(l => sharedLoci.includes(l)),
@@ -184,7 +279,7 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGeno
 
     const headerCell = document.createElement('td');
     headerCell.className = 'phenotype-cell group-phenotype';
-    headerCell.appendChild(buildPhenotypeCell(group.phenotype));
+    headerCell.appendChild(buildPhenotypeCell(group.phenotype, chanceLevels));
     if (group.lethal) {
       const tag = document.createElement('span');
       tag.className   = 'lethal-tag';
@@ -227,12 +322,13 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGeno
  * Renders the resolved coat name, white-pattern overlays, and an optional `*`
  * marker linking to notes via a tooltip.
  *
- * @param {{ base: string, patterns: string[], lethal: boolean, notes: string[] }} phenotype
+ * @param {{ base: string, patterns: string[], lethal: boolean, notes: string[], variations: string[] }} phenotype
+ * @param {Object} chanceLevels  { [variationKey]: 'random'|'low'|'increased'|'high' }
  * @returns {DocumentFragment}
  */
-function buildPhenotypeCell(phenotype) {
+function buildPhenotypeCell(phenotype, chanceLevels = {}) {
   const frag = document.createDocumentFragment();
-  const { base, patterns = [], notes = [] } = phenotype ?? {};
+  const { base, patterns = [], notes = [], variations = [] } = phenotype ?? {};
 
   const baseSpan = document.createElement('span');
   baseSpan.className   = base === 'Unknown' ? 'phenotype-base phenotype-base-unknown' : 'phenotype-base';
@@ -256,6 +352,40 @@ function buildPhenotypeCell(phenotype) {
     noteEl.className   = 'phenotype-note';
     noteEl.textContent = notes.join(' · ');
     frag.appendChild(noteEl);
+  }
+
+  // Special coat variations this outcome is eligible for. Eligibility means the
+  // foal has the required underlying pattern, not that it will express it.
+  if (variations.length > 0) {
+    const specEl = document.createElement('div');
+    specEl.className = 'phenotype-speculative';
+
+    const label = document.createElement('span');
+    label.className   = 'phenotype-speculative-label';
+    label.textContent = 'chance of ';
+    specEl.appendChild(label);
+
+    for (const key of variations) {
+      const config = coatVariations[key];
+      if (!config) continue;
+
+      const badge = document.createElement('span');
+      badge.className   = 'variation-badge';
+      badge.textContent = `${config.short}?`;
+      badge.title       = `${config.label}. ${config.note}`;
+      specEl.appendChild(badge);
+
+      const level = chanceLevels[key] ?? (config.inheritance === 'random' ? 'random' : 'low');
+      const chip  = document.createElement('span');
+      chip.className   = `variation-chance variation-chance-${level}`;
+      chip.textContent = CHANCE_LABELS[level];
+      chip.title = config.inheritance === 'random'
+        ? config.note
+        : 'Relative level based on how you marked the parents. The real odds are hidden.';
+      specEl.appendChild(chip);
+    }
+
+    frag.appendChild(specEl);
   }
 
   return frag;

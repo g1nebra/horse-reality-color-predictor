@@ -51,4 +51,9 @@ export default {
     options: [['n', 'n'], ['PATN2', 'n'], ['PATN2', 'PATN2']],
     default: ['n', 'n'],
   },
+  // Note: special coat variations (peacock leopard, varnished out spotted blanket,
+  // necklace tobiano, snowflake) are NOT testable modifier loci.
+  // Per the official docs snowflake is completely random, and the others ride on
+  // hidden numeric genetics bred up/down. They live in data/coatVariations.js, and
+  // the resolver only reports eligibility (eligibleVariations() in phenotypeResolver.js).
 };

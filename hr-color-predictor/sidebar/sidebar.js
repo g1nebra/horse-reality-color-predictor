@@ -8,7 +8,8 @@
 //   activePairingId – string | null
 //   pendingPick    – { horse, role } | null  (waiting for modal decision)
  
-import { parseGenotype } from '../engine/genotypeParser.js';
+import { parseGenotype }   from '../engine/genotypeParser.js';
+import { resolvePhenotype } from '../engine/phenotypeResolver.js';
 import {
   loadPairings,
   savePairings,
@@ -17,6 +18,7 @@ import {
   duplicatePairing,
   renamePairing,
   updateToggles,
+  updateVariationMarkers,
   getOpenSlotPairings,
   replacePairing,
   removePairing,
@@ -104,6 +106,7 @@ function handlePickHorse(msg) {
     tested:            parsed.tested,
     partiallyTested:   parsed.partiallyTested || !!partiallyTested,
     hiddenGeneToggles: {},
+    variationMarkers:  {},
   };
 
   // Always show the pick modal so the user can choose to create a new
@@ -234,11 +237,54 @@ async function onToggleUpdate(pairingId, role, toggles) {
   if (!pairing) return;
 
   const currentToggles = pairing[role]?.hiddenGeneToggles ?? {};
-  const updated = updateToggles(pairing, role, { ...currentToggles, ...toggles });
+  let updated = updateToggles(pairing, role, { ...currentToggles, ...toggles });
+
+  // A toggle change can change the horse's coat, which may invalidate an
+  // "expresses" marker (e.g. it is no longer a Leopard). Downgrade those to line.
+  const demotions = staleExpressMarkers(updated[role]);
+  if (demotions) updated = updateVariationMarkers(updated, role, demotions);
+
   pairings = replacePairing(pairings, updated);
   await savePairings(pairings);
 
-  // Re-render only the results content, don't rebuild the whole toggle panel
+  // Re-render the panel too: which marker options are offered depends on the coat.
+  renderHiddenGenePanels(updated);
+  renderResultsContent(updated);
+}
+
+// Return { [key]: 'line' } for any variation a horse is marked as expressing but
+// can no longer show with its current coat, or null if there is nothing to fix.
+function staleExpressMarkers(horse) {
+  const markers = horse?.variationMarkers;
+  if (!markers || !horse.rows) return null;
+
+  const expressed = Object.keys(markers).filter(k => markers[k] === 'expresses');
+  if (expressed.length === 0) return null;
+
+  const { genotype } = parseGenotype(horse.rows, horse.breed, horse.hiddenGeneToggles ?? {});
+  const eligible = new Set(resolvePhenotype(genotype, horse.breed).variations);
+
+  const fixes = {};
+  for (const k of expressed) if (!eligible.has(k)) fixes[k] = 'line';
+  return Object.keys(fixes).length ? fixes : null;
+}
+
+// Coat-variation marker callback ("expresses it" / "in their line").
+// For inherited variations this changes the chance level shown on foal outcomes,
+// so re-render the results content. Random variations are unaffected but the
+// re-render is harmless.
+
+async function onMarkerUpdate(pairingId, role, markers) {
+  const pairing = pairings.find(p => p.id === pairingId);
+  if (!pairing) return;
+
+  const updated = updateVariationMarkers(pairing, role, markers);
+  pairings = replacePairing(pairings, updated);
+  await savePairings(pairings);
+
+  // Re-render the panels too: setting one variation to "expresses" can drop
+  // another from "expresses" to "in their line", which the selects must reflect.
+  renderHiddenGenePanels(updated);
   renderResultsContent(updated);
 }
 
@@ -311,6 +357,7 @@ function renderHiddenGenePanels(pairing) {
     const panel = renderHiddenGenePanel(
       pairing.dam,
       (toggles) => onToggleUpdate(pairing.id, 'dam', toggles),
+      (markers) => onMarkerUpdate(pairing.id, 'dam', markers),
     );
     if (panel) {
       hasAnyPanel = true;
@@ -326,6 +373,7 @@ function renderHiddenGenePanels(pairing) {
     const panel = renderHiddenGenePanel(
       pairing.sire,
       (toggles) => onToggleUpdate(pairing.id, 'sire', toggles),
+      (markers) => onMarkerUpdate(pairing.id, 'sire', markers),
     );
     if (panel) {
       hasAnyPanel = true;

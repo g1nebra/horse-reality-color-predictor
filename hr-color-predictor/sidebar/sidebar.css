@@ -595,6 +595,65 @@ button {
   font-style: italic;
 }
 
+/* Special coat variation markers (inherited: peacock, varnished blanket, necklace). */
+.variation-marker-heading {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--p100);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #7b3fe4;
+}
+
+.variation-marker-info {
+  margin-left: 5px;
+  cursor: help;
+  text-transform: none;
+  opacity: 0.85;
+}
+
+/* Custom tooltip layer, escapes overflow/iframe clipping that hides native ones. */
+.hr-tooltip {
+  position: fixed;
+  z-index: 2147483647;
+  max-width: 220px;
+  background: var(--p900);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: normal;
+  padding: 6px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.hidden-gene-row-variation { align-items: center; }
+
+.variation-marker-name {
+  width: auto;
+  min-width: 60px;
+  flex: 1 1 auto;
+}
+
+/* Relative chance level chip shown after each "chance of" badge. */
+.variation-chance {
+  font-size: 9px;
+  font-style: italic;
+  margin-left: 4px;
+  margin-right: 6px;
+  color: var(--p500);
+}
+
+.variation-chance-random    { color: #8a6d1f; font-style: normal; font-weight: 700; }
+.variation-chance-low       { color: var(--p500); }
+.variation-chance-increased { color: #7b3fe4; }
+.variation-chance-high      { color: #5b21b6; font-weight: 700; }
+
 /* Results content */
 
 #results-content {
@@ -714,6 +773,63 @@ button {
   border-radius: 4px;
   padding: 4px 8px;
   margin-top: 6px;
+}
+
+/* Special coat variation disclaimer. Violet accent, distinct from the amber
+   partial + red lethal notes. */
+.results-variation-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #4a2a7a;
+  background: #f3ecfe;
+  border: 1px solid #d7bbf5;
+  border-left: 4px solid #7b3fe4;
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin-top: 6px;
+}
+
+.results-variation-badge {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #fff;
+  background: #7b3fe4;
+  text-transform: uppercase;
+}
+
+.results-variation-text { flex: 1 1 auto; }
+
+.results-variation-source {
+  color: #7b3fe4;
+  font-weight: 700;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.results-variation-source:hover { color: #5b21b6; }
+
+/* Inline "chance of" variation badge in the results table. */
+.variation-badge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: #7b3fe4;
+  vertical-align: middle;
+  text-transform: uppercase;
 }
 
 .lethal-row { background: #fff5f5; }
@@ -860,6 +976,21 @@ button {
   font-weight: 400;
   line-height: 1.4;
   white-space: normal;
+}
+
+/* "chance of" variation line in a phenotype cell (e.g. "chance of Peacock?"). */
+.phenotype-speculative {
+  margin-top: 3px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.phenotype-speculative-label {
+  font-size: 10px;
+  font-style: italic;
+  color: #7b3fe4;
 }
 
 .col-prob {

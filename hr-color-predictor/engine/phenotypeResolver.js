@@ -3,6 +3,8 @@
 // white-pattern overlays. Phase A covers base + dilutions + modifiers + grey;
 // Phase B layers in white patterns, Appaloosa composition, and lethal detection.
 
+import coatVariations from '../data/coatVariations.js';
+
 // Breed names that follow the incomplete-dominant Sooty rule on chestnut.
 // Plan 8: Lusitano, Trakehner, Oldenburg, Haflinger treat STY/n distinctly from
 // STY/STY on chestnut bases. v1 still flattens both into a single "Sooty" prefix
@@ -284,6 +286,31 @@ function resolveAppaloosa(g) {
   return 'Varnish';
 }
 
+// Special coat variations (see data/coatVariations.js) the horse is ELIGIBLE for:
+// the breed carries the variation AND the required underlying pattern is present.
+//
+// This is not a prediction. Per the official docs a random variation (snowflake
+// varnish roan) is pure chance, and an inherited one (peacock leopard, varnished
+// out spotted blanket, necklace tobiano) depends on hidden numeric genetics we
+// cannot read. The UI turns eligibility into a "chance of" badge and explains
+// which kind it is.
+//
+// Returns an array of variation KEYS from coatVariations (may be empty).
+function eligibleVariations(g, patterns, breed) {
+  const present = new Set(patterns);
+  return Object.entries(coatVariations)
+    .filter(([key, v]) => {
+      if (!v.breeds.includes(breed) || !present.has(v.requiresPattern)) return false;
+      // Varnished out spotted blanket only appears on a PATN2 blanket, never on a
+      // PATN1 blanket (both otherwise resolve to the same "Blanket" name).
+      if (key === 'varnishedBlanket') {
+        return has(g, 'PATN2', 'PATN2') && countAllele(g, 'PATN1', 'PATN1') === 0;
+      }
+      return true;
+    })
+    .map(([key]) => key);
+}
+
 function resolvePatterns(g, notes) {
   const patterns = [];
 
@@ -335,7 +362,7 @@ function isLethal(g) {
 /**
  * @param {Object} genotype  Parsed genotype, e.g. { E: ['E','e'], A: ['A','a'], ... }
  * @param {string} breed     Exact breed name as stored in genesMapping
- * @returns {{ base: string, patterns: string[], lethal: boolean, notes: string[] }}
+ * @returns {{ base: string, patterns: string[], lethal: boolean, notes: string[], variations: string[] }}
  */
 export function resolvePhenotype(genotype, breed) {
   const notes = [];
@@ -360,10 +387,11 @@ export function resolvePhenotype(genotype, breed) {
       : 'Base colour cannot be determined.';
 
     return {
-      base:     'Unknown',
+      base:       'Unknown',
       patterns,
       lethal,
-      notes:    [reasonNote, ...patternNotes],
+      notes:      [reasonNote, ...patternNotes],
+      variations: eligibleVariations(genotype, patterns, breed),
     };
   }
 
@@ -382,6 +410,7 @@ export function resolvePhenotype(genotype, breed) {
   // separately so they can be dropped by the Grey override below.
   const patternNotes = [];
   const patterns     = resolvePatterns(genotype, patternNotes);
+  const variations   = eligibleVariations(genotype, patterns, breed);
 
   if (isGrey(genotype)) {
     // Grey wipes the colour name and every modifier note. Pattern overlays
@@ -391,6 +420,7 @@ export function resolvePhenotype(genotype, breed) {
       patterns,
       lethal,
       notes:    ['Grey overrides all colour at adulthood, foal shows base colour.'],
+      variations,
     };
   }
 
@@ -402,8 +432,9 @@ export function resolvePhenotype(genotype, breed) {
       patterns,
       lethal:   true,
       notes:    [...notes, ...patternNotes],
+      variations,
     };
   }
 
-  return { base: name, patterns, lethal, notes: [...notes, ...patternNotes] };
+  return { base: name, patterns, lethal, notes: [...notes, ...patternNotes], variations };
 }

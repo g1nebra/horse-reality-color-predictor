@@ -8,6 +8,12 @@ export default {
     "whites": ["rb","Y","WM"],
     "none": ["PA","prl","CH","Z","mu","OLW","LP","PATN1","PATN2","TO","SB1","RN","W20"]
   },
+  "Appaloosa Horse": {
+    "visible": ["E","e","A","G","CR","D","nd1"],
+    "hidden": ["A+","At","STY","f"],
+    "whites": ["LP","PATN1","PATN2","MITF","W20","WM"],
+    "none": ["PA","prl","CH","Z","mu","OLW","SW2","TO","SB1","RN","rb","Y","W10"]
+  },
   "Arabian Horse": {
     "visible": ["E","e","A","G"],
     "hidden": ["A+","At","f","STY"],

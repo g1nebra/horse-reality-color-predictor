@@ -4,7 +4,10 @@
 //   { id: string, name: string, dam: Horse|null, sire: Horse|null }
 // Horse shape:
 //   { name, breed, url, photoUrl, rows, genotype, tested,
-//     partiallyTested, hiddenGeneToggles }
+//     partiallyTested, hiddenGeneToggles, variationMarkers }
+//   variationMarkers: { [coatVariationKey]: 'expresses' | 'line' | 'none' }
+//   User-declared. For inherited variations these raise/lower the displayed
+//   chance; for random ones they are tracking only. Never affects the genotype.
 
 const STORAGE_KEY = 'pairings';
 
@@ -180,6 +183,36 @@ export function updateToggles(pairing, role, toggles) {
   const horse = pairing[role];
   if (!horse) return pairing;
   return { ...pairing, [role]: { ...horse, hiddenGeneToggles: toggles } };
+}
+
+/**
+ * Merge user-declared coat-variation markers onto a horse inside a pairing.
+ * Independent of genetics. Drives the "chance of" level for inherited variations
+ * (peacock, varnished out spotted blanket, necklace) and tracking for random ones.
+ *
+ * A horse only shows one underlying pattern, so it can EXPRESS at most one
+ * variation. If this update sets one to 'expresses', any other variation already
+ * 'expresses' is dropped to 'line' (it can still be in the family line).
+ *
+ * @param {Object}        pairing
+ * @param {'dam'|'sire'}  role
+ * @param {Object}        markers  { [variationKey]: 'expresses'|'line'|'none' }
+ * @returns {Object}  New pairing object
+ */
+export function updateVariationMarkers(pairing, role, markers) {
+  const horse = pairing[role];
+  if (!horse) return pairing;
+
+  const merged = { ...(horse.variationMarkers ?? {}), ...markers };
+
+  const nowExpressing = Object.keys(markers).find(k => markers[k] === 'expresses');
+  if (nowExpressing) {
+    for (const key of Object.keys(merged)) {
+      if (key !== nowExpressing && merged[key] === 'expresses') merged[key] = 'line';
+    }
+  }
+
+  return { ...pairing, [role]: { ...horse, variationMarkers: merged } };
 }
 
 /**

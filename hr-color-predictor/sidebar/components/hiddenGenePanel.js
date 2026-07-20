@@ -9,13 +9,21 @@
  //      hiddenModifiers gets a single tri-state dropdown (n/n, X/n, X/X).
  //
  // Export:
- //   renderHiddenGenePanel(horse, onUpdate) → <div> | null
+ //   renderHiddenGenePanel(horse, onUpdate, onMarkerUpdate) → <div> | null
  //
  //   onUpdate(newToggles), called when the user changes any dropdown.
  //   newToggles shape: { A: ['A+', 'a'], f: ['F', 'f'], STY: ['n', 'n'], ... }
+ //
+ //   onMarkerUpdate(markers), called when the user changes a special coat variation
+ //   marker. markers shape: { peacock: 'expresses' | 'line' | 'none' }.
+ //   Never feeds into the genotype; for inherited variations it raises/lowers the
+ //   chance level shown on foal outcomes, for random ones it is tracking only.
 
 import genesMapping    from '../../data/genesMapping.js';
 import hiddenModifiers from '../../data/hiddenModifiers.js';
+import coatVariations  from '../../data/coatVariations.js';
+import { parseGenotype }   from '../../engine/genotypeParser.js';
+import { resolvePhenotype } from '../../engine/phenotypeResolver.js';
 
 // Per-slot ambiguous alleles. The raw DOM token is the key, the full set of
 // resolutions is the value. Only alleles present in the breed's hidden list
@@ -57,19 +65,41 @@ function fixedModifierLociForBreed(breed) {
     .map(([key, alleles]) => ({ key, alleles, ...hiddenModifiers[key] }));
 }
 
+// Inherited coat variations this breed can carry, as [key, config] pairs. Random
+// variations (e.g. snowflake) get no marker: the parents cannot affect them.
+function variationsForBreed(breed) {
+  return Object.entries(coatVariations)
+    .filter(([, v]) => v.inheritance === 'inherited' && v.breeds.includes(breed));
+}
+
+// Marker options for an inherited variation. Both 'expresses' and 'line' raise the
+// displayed chance (the hidden numeric value is bred up by breeding horses that
+// show the variation, or that have it in their family line).
+const INHERITED_MARKER_OPTIONS = [
+  { value: 'none',      label: 'No' },
+  { value: 'line',      label: 'In their line' },
+  { value: 'expresses', label: 'Yes, expresses it' },
+];
+
 // Main export
 
 /**
- * @param {Object}   horse      Horse object with .breed, .genotype, .hiddenGeneToggles
- * @param {Function} onUpdate   Called with updated hiddenGeneToggles when any toggle changes
- * @returns {HTMLElement | null}  null if no Agouti ambiguity AND no modifier loci for this breed
+ * @param {Object}   horse           Horse object with .breed, .genotype, .hiddenGeneToggles
+ * @param {Function} onUpdate        Called with updated hiddenGeneToggles when any toggle changes
+ * @param {Function} [onMarkerUpdate]  Called with { [variationKey]: state } when a marker changes
+ * @returns {HTMLElement | null}  null if there is nothing to show for this breed
  */
-export function renderHiddenGenePanel(horse, onUpdate) {
+export function renderHiddenGenePanel(horse, onUpdate, onMarkerUpdate) {
+  hideTooltip(); // clear any stray tooltip left over from a previous render
   const ambiguousRows = findAmbiguousSlots(horse);
   const modifierLoci  = modifierLociForBreed(horse.breed);
   const fixedLoci     = fixedModifierLociForBreed(horse.breed);
+  const variations    = typeof onMarkerUpdate === 'function'
+    ? variationsForBreed(horse.breed)
+    : [];
 
-  if (ambiguousRows.length === 0 && modifierLoci.length === 0 && fixedLoci.length === 0) return null;
+  if (ambiguousRows.length === 0 && modifierLoci.length === 0
+      && fixedLoci.length === 0 && variations.length === 0) return null;
 
   const container = document.createElement('div');
   container.className = 'hidden-gene-panel';
@@ -86,7 +116,126 @@ export function renderHiddenGenePanel(horse, onUpdate) {
     container.appendChild(renderFixedRow(fixed));
   }
 
+  if (variations.length > 0) {
+    const expressible = expressibleVariations(horse);
+    container.appendChild(renderVariationHeading());
+    for (const [key, config] of variations) {
+      container.appendChild(
+        renderVariationMarkerRow(horse, key, config, onMarkerUpdate, expressible.has(key)),
+      );
+    }
+  }
+
   return container;
+}
+
+// Variations the horse's own coat lets it EXPRESS: peacock needs a Leopard,
+// varnished out spotted blanket needs a PATN2 blanket, etc. Uses the effective
+// genotype (test result + the user's hidden toggles), same as the results panel.
+function expressibleVariations(horse) {
+  if (!horse.rows) return new Set();
+  const { genotype } = parseGenotype(horse.rows, horse.breed, horse.hiddenGeneToggles ?? {});
+  return new Set(resolvePhenotype(genotype, horse.breed).variations);
+}
+
+function renderVariationHeading() {
+  const heading = document.createElement('div');
+  heading.className = 'variation-marker-heading';
+
+  const label = document.createElement('span');
+  label.textContent = 'Special coat variations';
+  heading.appendChild(label);
+
+  const info = document.createElement('span');
+  info.className   = 'variation-marker-info';
+  info.textContent = 'ⓘ';
+  attachTooltip(info,
+    'Coat-aware: "Yes, expresses it" only appears when this horse\'s own coat can '
+    + 'show the variation (a Leopard for peacock, a PATN2 blanket for varnished out '
+    + 'spotted blanket). You can always mark it as being in the family line.');
+  heading.appendChild(info);
+
+  return heading;
+}
+
+// Lightweight tooltip rendered in a fixed layer on <body>, so it is never clipped
+// by the panel's overflow or the sidebar edge (native `title` tooltips get hidden
+// inside the sidebar iframe).
+function hideTooltip() {
+  document.querySelectorAll('.hr-tooltip').forEach(t => t.remove());
+}
+
+function attachTooltip(el, message) {
+  const show = () => {
+    hideTooltip();
+    const tip = document.createElement('div');
+    tip.className   = 'hr-tooltip';
+    tip.textContent = message;
+    document.body.appendChild(tip);
+
+    const r = el.getBoundingClientRect();
+    const m = 6;
+    let left = Math.min(r.left, window.innerWidth - tip.offsetWidth - m);
+    left = Math.max(m, left);
+    let top = r.bottom + m;
+    if (top + tip.offsetHeight + m > window.innerHeight) {
+      top = Math.max(m, r.top - tip.offsetHeight - m);
+    }
+    tip.style.left = `${left}px`;
+    tip.style.top  = `${top}px`;
+  };
+
+  el.addEventListener('mouseenter', show);
+  el.addEventListener('mouseleave', hideTooltip);
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (document.querySelector('.hr-tooltip')) hideTooltip();
+    else show();
+  });
+}
+
+// User-declared marker for an inherited coat variation. 3-state select: marking a
+// parent as expressing the variation, or having it in their family line, raises
+// the chance shown for foals. "Expresses it" is only offered when the horse's own
+// coat can show it (canExpress); otherwise only "No" / "In their line" are given.
+function renderVariationMarkerRow(horse, key, config, onMarkerUpdate, canExpress) {
+  const stored  = horse.variationMarkers?.[key] ?? 'none';
+  const current = (stored === 'expresses' && !canExpress) ? 'line' : stored;
+
+  const row = document.createElement('div');
+  row.className = 'hidden-gene-row hidden-gene-row-variation';
+
+  const nameEl = document.createElement('div');
+  nameEl.className   = 'hidden-gene-name variation-marker-name';
+  nameEl.textContent = config.label;
+  nameEl.title       = config.note;
+  row.appendChild(nameEl);
+
+  const slotWrapper = document.createElement('div');
+  slotWrapper.className = 'hidden-gene-slot';
+
+  const sel = document.createElement('select');
+  sel.title = canExpress
+    ? `Does this horse show ${config.label}, or have it in their family line?`
+    : `This horse's coat cannot show ${config.label}. You can still mark it as being in the family line.`;
+
+  const options = canExpress
+    ? INHERITED_MARKER_OPTIONS
+    : INHERITED_MARKER_OPTIONS.filter(opt => opt.value !== 'expresses');
+
+  for (const opt of options) {
+    const o = document.createElement('option');
+    o.value       = opt.value;
+    o.textContent = opt.label;
+    if (opt.value === current) o.selected = true;
+    sel.appendChild(o);
+  }
+
+  sel.addEventListener('change', () => onMarkerUpdate({ [key]: sel.value }));
+  slotWrapper.appendChild(sel);
+
+  row.appendChild(slotWrapper);
+  return row;
 }
 
 function renderFixedRow({ label, alleles }) {
