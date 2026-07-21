@@ -817,6 +817,41 @@ button {
 
 .results-variation-source:hover { color: #5b21b6; }
 
+/* Collapsible phenotype groups (compact results). */
+.results-table tbody.group.collapsed .group-detail { display: none; }
+
+.results-table tr.group-header.clickable { cursor: pointer; }
+.results-table tr.group-header.clickable:hover { background: var(--p000); }
+
+.group-caret {
+  display: inline-block;
+  width: 10px;
+  margin-right: 3px;
+  font-size: 8px;
+  color: var(--p500);
+  transition: transform 0.1s ease;
+  vertical-align: middle;
+}
+.results-table tbody.group.collapsed .group-caret { transform: rotate(-90deg); }
+
+/* Compact / expand-all control above the results table. */
+.results-compact-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -4px;
+}
+.results-compact-toggle {
+  background: none;
+  border: 1px solid var(--p200);
+  border-radius: 3px;
+  color: var(--p600);
+  font-family: inherit;
+  font-size: 10px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.results-compact-toggle:hover { background: var(--p000); }
+
 /* Inline "chance of" variation badge in the results table. */
 .variation-badge {
   display: inline-block;

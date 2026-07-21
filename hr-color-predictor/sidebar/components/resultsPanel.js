@@ -58,6 +58,12 @@ export function renderResults(pairing) {
     return panel;
   }
 
+  // Reset remembered collapse state when switching to a different pairing.
+  if (pairing.id !== collapseScopeId) {
+    collapsedGroups = new Set();
+    collapseScopeId = pairing.id;
+  }
+
   const damResult  = parseGenotype(pairing.dam.rows,  pairing.dam.breed,  pairing.dam.hiddenGeneToggles);
   const sireResult = parseGenotype(pairing.sire.rows, pairing.sire.breed, pairing.sire.hiddenGeneToggles);
 
@@ -168,6 +174,41 @@ export function renderResults(pairing) {
 
   // Table
   const table = buildTable(outcomes, sharedLoci, lethalSet, phenotypeByGenotype, chanceLevels);
+
+  // Compact / expand-all control (only when there is more than one outcome row).
+  if (outcomes.length > 1) {
+    const bar = document.createElement('div');
+    bar.className = 'results-compact-bar';
+
+    const btn = document.createElement('button');
+    btn.type      = 'button';
+    btn.className = 'results-compact-toggle';
+
+    const bodies = () => [...table.querySelectorAll('tbody.group')];
+    const syncLabel = () => {
+      const bs = bodies();
+      const allCollapsed = bs.length > 0 && bs.every(tb => tb.classList.contains('collapsed'));
+      btn.textContent = allCollapsed ? '▸ Expand all' : '▾ Compact all';
+    };
+
+    btn.addEventListener('click', () => {
+      const allCollapsed = bodies().every(tb => tb.classList.contains('collapsed'));
+      for (const tb of bodies()) {
+        const key = tb.dataset.groupKey;
+        if (allCollapsed) { tb.classList.remove('collapsed'); collapsedGroups.delete(key); }
+        else              { tb.classList.add('collapsed');    collapsedGroups.add(key); }
+      }
+      syncLabel();
+    });
+
+    // Keep the label in sync when a single group is toggled from its header.
+    table.addEventListener('hr-group-toggle', syncLabel);
+    syncLabel();
+
+    bar.appendChild(btn);
+    panel.appendChild(bar);
+  }
+
   panel.appendChild(table);
 
   return panel;
@@ -248,7 +289,7 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGeno
     const key = `${ph?.base ?? '?'}|${patterns.join('·')}|${ph?.lethal ? 'L' : ''}`;
     let g = groups.get(key);
     if (!g) {
-      g = { phenotype: ph, outcomes: [], totalProb: 0, lethal: !!ph?.lethal };
+      g = { key, phenotype: ph, outcomes: [], totalProb: 0, lethal: !!ph?.lethal };
       groups.set(key, g);
     }
     g.outcomes.push(o);
@@ -278,13 +319,26 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGeno
     const tbody = document.createElement('tbody');
     tbody.className = 'group';
     if (group.lethal) tbody.classList.add('lethal-group');
+    tbody.dataset.groupKey = group.key;
+    if (collapsedGroups.has(group.key)) tbody.classList.add('collapsed');
 
     const headerRow = document.createElement('tr');
-    headerRow.className = 'group-header';
+    headerRow.className = 'group-header clickable';
     if (group.lethal) headerRow.classList.add('lethal-row');
+    headerRow.title = 'Click to collapse / expand genotypes';
+    headerRow.addEventListener('click', () => {
+      const collapsed = tbody.classList.toggle('collapsed');
+      if (collapsed) collapsedGroups.add(group.key);
+      else           collapsedGroups.delete(group.key);
+      table.dispatchEvent(new CustomEvent('hr-group-toggle'));
+    });
 
     const headerCell = document.createElement('td');
     headerCell.className = 'phenotype-cell group-phenotype';
+    const caret = document.createElement('span');
+    caret.className   = 'group-caret';
+    caret.textContent = '▾';
+    headerCell.appendChild(caret);
     headerCell.appendChild(buildPhenotypeCell(group.phenotype, chanceLevels));
     if (group.lethal) {
       const tag = document.createElement('span');
