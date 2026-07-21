@@ -1,0 +1,10 @@
+{
+  "name": "hr-color-predictor-dev",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only tooling (tests) for the HR Color Predictor extension. NOT part of the shipped extension. Chrome ignores this file; the release zip only packs hr-color-predictor/.",
+  "scripts": {
+    "test": "node --test tests/",
+    "smoke": "node tests/smoke.mjs"
+  }
+}

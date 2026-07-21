@@ -38,6 +38,12 @@ function listJoin(items) {
   return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 }
 
+// Which phenotype groups are collapsed, remembered across re-renders of the same
+// pairing (a hidden-gene or marker change re-renders the results). Reset when a
+// different pairing is opened.
+let collapsedGroups = new Set();
+let collapseScopeId = null;
+
 // Main export
 /**
  * @param {Object} pairing  { dam, sire }
