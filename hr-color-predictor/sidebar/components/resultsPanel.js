@@ -44,6 +44,28 @@ function listJoin(items) {
 let collapsedGroups = new Set();
 let collapseScopeId = null;
 
+// Collapse/expand a group's <tbody> with a small fade animation. `collapsedGroups`
+// is the source of truth (updated by the caller); this only drives the visuals.
+const GROUP_ANIM_MS = 150;
+function setGroupCollapsed(tbody, collapse) {
+  clearTimeout(tbody.__animTimer);
+  const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (collapse) {
+    if (instant) { tbody.classList.add('collapsed'); return; }
+    tbody.classList.add('anim-collapse');
+    tbody.__animTimer = setTimeout(() => {
+      tbody.classList.remove('anim-collapse');
+      tbody.classList.add('collapsed');
+    }, GROUP_ANIM_MS);
+  } else {
+    tbody.classList.remove('collapsed');
+    if (instant) return;
+    tbody.classList.add('anim-expand');
+    tbody.__animTimer = setTimeout(() => tbody.classList.remove('anim-expand'), GROUP_ANIM_MS);
+  }
+}
+
 // Main export
 /**
  * @param {Object} pairing  { dam, sire }
@@ -187,16 +209,17 @@ export function renderResults(pairing) {
     const bodies = () => [...table.querySelectorAll('tbody.group')];
     const syncLabel = () => {
       const bs = bodies();
-      const allCollapsed = bs.length > 0 && bs.every(tb => tb.classList.contains('collapsed'));
+      const allCollapsed = bs.length > 0 && bs.every(tb => collapsedGroups.has(tb.dataset.groupKey));
       btn.textContent = allCollapsed ? '▸ Expand all' : '▾ Compact all';
     };
 
     btn.addEventListener('click', () => {
-      const allCollapsed = bodies().every(tb => tb.classList.contains('collapsed'));
+      const allCollapsed = bodies().every(tb => collapsedGroups.has(tb.dataset.groupKey));
       for (const tb of bodies()) {
         const key = tb.dataset.groupKey;
-        if (allCollapsed) { tb.classList.remove('collapsed'); collapsedGroups.delete(key); }
-        else              { tb.classList.add('collapsed');    collapsedGroups.add(key); }
+        if (allCollapsed) collapsedGroups.delete(key);
+        else              collapsedGroups.add(key);
+        setGroupCollapsed(tb, !allCollapsed);
       }
       syncLabel();
     });
@@ -327,9 +350,10 @@ function buildTable(outcomes, sharedLoci, lethalSet = new Set(), phenotypeByGeno
     if (group.lethal) headerRow.classList.add('lethal-row');
     headerRow.title = 'Click to collapse / expand genotypes';
     headerRow.addEventListener('click', () => {
-      const collapsed = tbody.classList.toggle('collapsed');
-      if (collapsed) collapsedGroups.add(group.key);
-      else           collapsedGroups.delete(group.key);
+      const willCollapse = !collapsedGroups.has(group.key);
+      if (willCollapse) collapsedGroups.add(group.key);
+      else              collapsedGroups.delete(group.key);
+      setGroupCollapsed(tbody, willCollapse);
       table.dispatchEvent(new CustomEvent('hr-group-toggle'));
     });
 

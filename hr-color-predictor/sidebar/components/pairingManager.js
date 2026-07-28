@@ -1,7 +1,10 @@
 // Pure data module, no DOM, no rendering.
 // All pairing CRUD + chrome.storage.local persistence.
 // Pairing shape:
-//   { id: string, name: string, dam: Horse|null, sire: Horse|null }
+//   { id: string, name: string, dam: Horse|null, sire: Horse|null, folderId?: string|null }
+//   folderId: id of the folder the pairing belongs to; null/absent = Unassigned.
+// Folder shape:
+//   { id: string, name: string }
 // Horse shape:
 //   { name, breed, url, photoUrl, rows, genotype, tested,
 //     partiallyTested, hiddenGeneToggles, variationMarkers }
@@ -10,6 +13,8 @@
 //   chance; for random ones they are tracking only. Never affects the genotype.
 
 const STORAGE_KEY = 'pairings';
+const FOLDERS_KEY = 'folders';
+const MAX_FOLDER_NAME = 30;
 
 // Storage
 
@@ -34,6 +39,34 @@ export function savePairings(pairings) {
     chrome.storage.local.set({ [STORAGE_KEY]: sanitized }, () => {
       if (chrome.runtime.lastError) {
         console.error('[HR Color Predictor] savePairings failed:', chrome.runtime.lastError.message);
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+/**
+ * @returns {Promise<Array>} folders, or [] when none stored.
+ */
+export function loadFolders() {
+  return new Promise(resolve => {
+    chrome.storage.local.get(FOLDERS_KEY, result => {
+      resolve(result[FOLDERS_KEY] ?? []);
+    });
+  });
+}
+
+/**
+ * @param {Array} folders
+ * @returns {Promise<void>}
+ */
+export function saveFolders(folders) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [FOLDERS_KEY]: folders }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[HR Color Predictor] saveFolders failed:', chrome.runtime.lastError.message);
         reject(chrome.runtime.lastError);
       } else {
         resolve();
@@ -213,6 +246,80 @@ export function updateVariationMarkers(pairing, role, markers) {
   }
 
   return { ...pairing, [role]: { ...horse, variationMarkers: merged } };
+}
+
+// Folders
+
+/**
+ * Add a new folder. Returns a new folders array.
+ *
+ * @param {Array}  folders
+ * @param {string} name
+ * @returns {Array}
+ */
+export function createFolder(folders, name) {
+  const trimmed = ((name ?? '').trim() || `Folder ${folders.length + 1}`).slice(0, MAX_FOLDER_NAME);
+  const id = `folder-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  return [...folders, { id, name: trimmed }];
+}
+
+/**
+ * Rename a folder. Empty names are ignored (keeps the old name).
+ *
+ * @param {Array}  folders
+ * @param {string} id
+ * @param {string} name
+ * @returns {Array}
+ */
+export function renameFolder(folders, id, name) {
+  const trimmed = (name ?? '').trim().slice(0, MAX_FOLDER_NAME);
+  return folders.map(f => (f.id === id ? { ...f, name: trimmed || f.name } : f));
+}
+
+/**
+ * Remove a folder from the list. Does NOT touch pairings; the caller should
+ * reassign that folder's pairings to Unassigned first (assignPairingsToFolder).
+ *
+ * @param {Array}  folders
+ * @param {string} id
+ * @returns {Array}
+ */
+export function deleteFolder(folders, id) {
+  return folders.filter(f => f.id !== id);
+}
+
+/**
+ * Set folderId on the given pairings (by id). folderId null = Unassigned.
+ *
+ * @param {Array}        pairings
+ * @param {string[]}     ids
+ * @param {string|null}  folderId
+ * @returns {Array}  New pairings array.
+ */
+export function assignPairingsToFolder(pairings, ids, folderId) {
+  const idSet = new Set(ids);
+  return pairings.map(p => (idSet.has(p.id) ? { ...p, folderId: folderId ?? null } : p));
+}
+
+/**
+ * Group pairings by folder for rendering. A pairing whose folderId is null,
+ * missing, or points to a folder that no longer exists counts as Unassigned.
+ *
+ * @param {Array} pairings
+ * @param {Array} folders
+ * @returns {{ folderId: string|null, name: string, pairings: Array }[]}
+ *   Folder sections in `folders` order, followed by an Unassigned section.
+ */
+export function groupPairingsByFolder(pairings, folders) {
+  const known = new Set(folders.map(f => f.id));
+  const sections = folders.map(f => ({
+    folderId: f.id,
+    name: f.name,
+    pairings: pairings.filter(p => p.folderId === f.id),
+  }));
+  const unassigned = pairings.filter(p => !p.folderId || !known.has(p.folderId));
+  sections.push({ folderId: null, name: 'Unassigned', pairings: unassigned });
+  return sections;
 }
 
 /**

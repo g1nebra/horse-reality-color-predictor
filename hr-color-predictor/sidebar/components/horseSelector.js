@@ -23,54 +23,72 @@ import { isComplete } from './pairingManager.js';
  * @returns {HTMLElement}
  */
 export function renderPairingCard(pairing, callbacks) {
+  const organizing = !!callbacks.organizing;
+
   const card = document.createElement('div');
   card.className = `pairing-card${isComplete(pairing) ? ' complete' : ''}`;
   card.dataset.pairingId = pairing.id;
+  if (organizing) {
+    card.classList.add('selectable');
+    if (callbacks.isSelected) card.classList.add('selected');
+  }
 
   // Header
   const header = document.createElement('div');
   header.className = 'pairing-card-header';
 
-  // Editable name
+  // In organize mode a check indicator replaces the rename/action affordances.
+  if (organizing) {
+    const check = document.createElement('span');
+    check.className   = 'pairing-select-check';
+    check.textContent = callbacks.isSelected ? '✓' : '';
+    header.appendChild(check);
+  }
+
+  // Name (editable only outside organize mode)
   const nameEl = document.createElement('span');
   nameEl.className   = 'pairing-card-name';
   nameEl.textContent = pairing.name;
-  nameEl.title       = 'Click to rename';
-  nameEl.addEventListener('click', (e) => {
-    e.stopPropagation();
-    startRename(nameEl, pairing, callbacks.onRename);
-  });
+  if (!organizing) {
+    nameEl.title = 'Click to rename';
+    nameEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startRename(nameEl, pairing, callbacks.onRename);
+    });
+  }
+  header.appendChild(nameEl);
 
-  const actionsEl = document.createElement('div');
-  actionsEl.className = 'pairing-card-actions';
+  if (!organizing) {
+    const actionsEl = document.createElement('div');
+    actionsEl.className = 'pairing-card-actions';
 
-  // Duplicate button with inline confirm
-  const btnDuplicate = makeIconBtn('⊕', 'Duplicate pairing');
-  addInlineConfirm(btnDuplicate, 'Copy?', 'Copy', () => callbacks.onDuplicate(pairing.id));
+    const btnDuplicate = makeIconBtn('⊕', 'Duplicate pairing');
+    addInlineConfirm(btnDuplicate, 'Copy?', 'Copy', () => callbacks.onDuplicate(pairing.id));
 
-  // Delete button with inline confirm
-  const btnDelete = makeIconBtn('×', 'Delete pairing');
-  btnDelete.classList.add('btn-delete');
-  addInlineConfirm(btnDelete, 'Delete?', '×', () => callbacks.onDelete(pairing.id));
+    const btnDelete = makeIconBtn('×', 'Delete pairing');
+    btnDelete.classList.add('btn-delete');
+    addInlineConfirm(btnDelete, 'Delete?', '×', () => callbacks.onDelete(pairing.id));
 
-  actionsEl.append(btnDuplicate, btnDelete);
-  header.append(nameEl, actionsEl);
+    actionsEl.append(btnDuplicate, btnDelete);
+    header.appendChild(actionsEl);
+  }
 
   // Slots
   const slotsEl = document.createElement('div');
   slotsEl.className = 'pairing-slots';
-
   slotsEl.appendChild(renderHorseSlot(pairing, 'dam',  callbacks));
   slotsEl.appendChild(renderHorseSlot(pairing, 'sire', callbacks));
 
-  // Clicking the slots area opens results (complete pairings only)
-  if (isComplete(pairing)) {
+  if (organizing) {
+    card.addEventListener('click', () => callbacks.onToggleSelect(pairing.id));
+  } else if (isComplete(pairing)) {
     slotsEl.addEventListener('click', () => callbacks.onSlotsClick(pairing.id));
   }
 
   card.append(header, slotsEl);
   return card;
 }
+
 
 // Inline confirm helper
 
